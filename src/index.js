@@ -6,6 +6,7 @@
 var AWS = require("aws-sdk");
 const { S3Utils } = require("../recording/utils/s3");
 var ecs = new AWS.ECS();
+let s3;
 
 // Reading environment variables
 const ecsClusterArn = process.env.ecsClusterArn;
@@ -101,7 +102,7 @@ exports.handler = function (event, context, callback) {
         event.queryStringParameters.recordingName
       );
 
-      const s3 = new S3Utils(recordingArtifactsBucket, recordingName);
+      s3 = new S3Utils(recordingArtifactsBucket, recordingName);
 
       s3.read.then((recording) => {
         response = {
@@ -132,7 +133,7 @@ exports.handler = function (event, context, callback) {
         event.queryStringParameters.recordingName
       );
 
-      const s3 = new S3Utils(recordingArtifactsBucket, recordingName);
+      s3 = new S3Utils(recordingArtifactsBucket, recordingName);
 
       s3.remove()
         .then(() => {
@@ -221,6 +222,8 @@ function startRecording(event, context, callback, targetURL, recordingName) {
       response.body = JSON.stringify(err, null, " ");
       context.succeed(response);
     } else {
+      // TODO: always return JSON >>>object<<<
+
       console.log(data); // successful response
       response.statusCode = 200;
       response.body = JSON.stringify(
