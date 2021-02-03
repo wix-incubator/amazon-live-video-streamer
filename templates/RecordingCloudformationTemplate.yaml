@@ -12,7 +12,7 @@ Parameters:
     Default: 8192
   ECSContainerName:
     Type: String
-    Default: 'recording-demo-container'
+    Default: 'recording-container'
   ECSContainerCpu:
     Type: Number
     Default: 4096
@@ -25,7 +25,7 @@ Parameters:
   EcsClusterName:
     Type: String
     Description: 'Specifies the ECS Cluster Name with which the resources would be associated'
-    Default: 'RecordingDemoEC2Cluster'
+    Default: 'RecordingEC2Cluster'
   ECRDockerImageArn:
     Type: String
     Description: 'ARN of the docker image stored in ECR along with the tag'
@@ -51,13 +51,13 @@ Parameters:
     m4.2xlarge, m4.4xlarge, m5.large, m5.xlarge, m5.2xlarge, m5.4xlarge, m5.8xlarge, c4.xlarge, c4.2xlarge, 
     c4.4xlarge, c5.large, c5.xlarge, c5.2xlarge, c5.4xlarge]
     ConstraintDescription: Please choose a valid instance type.
-  RecordingDemoLogGroupName:
+  RecordingLogGroupName:
     Type: String
-    Default: RecordingDemoLogGroup
+    Default: RecordingLogGroup
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
     Type: String
-    Default: recording-demo-environment
+    Default: recording-environment
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
@@ -76,8 +76,8 @@ Resources:
     Properties:
         AccessControl: BucketOwnerFullControl
         BucketName:
-          Fn::Join: ['', ['chime-meeting-sdk-', {Ref: 'AWS::AccountId'}, '-', {Ref: 'AWS::Region'}, '-recordings']]
-  RecordingDemoLambdaExecutionRole:
+          Fn::Join: ['', ['live-video-', {Ref: 'AWS::AccountId'}, '-', {Ref: 'AWS::Region'}, '-recordings']]
+  RecordingLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
         ManagedPolicyArns:
@@ -91,21 +91,21 @@ Resources:
                 Service: [lambda.amazonaws.com]
             Version: '2012-10-17'
   
-  RecordingDemoBuildDeployGroup:
+  RecordingBuildDeployGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: 
-        Ref: RecordingDemoLogGroupName
+        Ref: RecordingLogGroupName
       RetentionInDays: 365
   
-  RecordingDemoLambdaFunction:
+  RecordingLambdaFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      FunctionName: RecordingDemoLambda
+      FunctionName: RecordingLambda
       Description: Lambda to interact with ECS for starting and stopping recording.
       Handler: index.handler
       Role: 
-        Fn::GetAtt: [RecordingDemoLambdaExecutionRole, Arn]
+        Fn::GetAtt: [RecordingLambdaExecutionRole, Arn]
       Runtime: nodejs12.x
       Timeout: 300
       MemorySize: 3008
@@ -115,8 +115,8 @@ Resources:
             Fn::GetAtt: [ECSCluster, Arn]
           ecsContainerName: 
             Ref: ECSContainerName
-          ecsTaskDefinationArn: 
-            Ref: ECSRecordingDemoTaskDefinition
+          ecsTaskDefinitionArn: 
+            Ref: ECSRecordingTaskDefinition
           recordingArtifactsBucket:
             Ref: RecordingArtifactsUploadBucket
       CodeUri: ../src/
@@ -127,7 +127,7 @@ Resources:
             Path: /recording
             Method: POST
   
-  ECSRecordingDemoTaskDefinition:
+  ECSRecordingTaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
         Cpu: 
@@ -156,7 +156,7 @@ Resources:
                 LogDriver: awslogs
                 Options:
                   awslogs-group:
-                    Ref: RecordingDemoBuildDeployGroup
+                    Ref: RecordingBuildDeployGroup
                   awslogs-region:
                     Ref: AWS::Region
                   awslogs-stream-prefix:
