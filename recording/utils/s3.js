@@ -20,7 +20,7 @@ class S3Utils {
 
   read() {
     return new Promise((resolve) => {
-      this.fileS3.getObject(params, (err, data) => {
+      this.fileS3.getObject((err, data) => {
         if (err) {
           console.log(
             "[read process] - failure - error handling on failure",
