@@ -30,6 +30,7 @@ exports.handler = function (event, context, callback) {
   let recordingName = "";
   let taskId = "";
   let action = "";
+  let asyncWait = false;
 
   console.log(event);
   responseBody.input = event;
@@ -104,6 +105,8 @@ exports.handler = function (event, context, callback) {
 
       s3 = new S3Utils(recordingArtifactsBucket, `${recordingName}.mp4`);
 
+      asyncWait = true;
+
       s3.read().then((recordingData) => {
         response = {
           statusCode: 200,
@@ -176,8 +179,10 @@ exports.handler = function (event, context, callback) {
       };
   }
 
-  console.log("response: " + JSON.stringify(response));
-  callback(null, response);
+  if (!asyncWait) {
+    console.log("response: " + JSON.stringify(response));
+    callback(null, response);
+  }
 };
 
 function startRecording(event, context, callback, targetURL, recordingName) {
