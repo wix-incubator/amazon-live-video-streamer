@@ -30,6 +30,7 @@ exports.handler = function (event, context, callback) {
   let recordingName = "";
   let taskId = "";
   let action = "";
+  let isAsync = false;
 
   console.log(event);
   responseBody.input = event;
@@ -104,20 +105,35 @@ exports.handler = function (event, context, callback) {
 
       s3 = new S3Utils(recordingArtifactsBucket, `${recordingName}.mp4`);
 
-      let readPromise = s3.read().then((recordingData) => {
-        response = {
-          statusCode: 200,
-          headers: {
-            "Content-Type": recordingData.ContentType,
-            "Content-Length": recordingData.ContentLength,
-          },
-          body: recordingData.Body,
-        };
+      isAsync = true;
 
-        context.succeed(response);
-      });
+      s3.read()
+        .then((recordingData) => {
+          response = {
+            statusCode: 200,
+            headers: {
+              "Content-Type": recordingData.ContentType,
+              "Content-Length": recordingData.ContentLength,
+            },
+            body: recordingData.Body,
+          };
 
-      return readPromise;
+          console.log("download response: " + JSON.stringify(response));
+          context.succeed(response);
+          callback(null, response);
+        })
+        .catch((e) => {
+          response = {
+            statusCode: 500,
+            headers: {},
+            body: JSON.stringify({ error: e }, null, " "),
+          };
+
+          context.succeed(response);
+          callback(null, response);
+        });
+
+      break;
 
     case "delete":
       if (!ensureParameterExists("recordingName")) {
@@ -176,8 +192,10 @@ exports.handler = function (event, context, callback) {
       };
   }
 
-  console.log("response: " + JSON.stringify(response));
-  callback(null, response);
+  if (!isAsync) {
+    console.log("response: " + JSON.stringify(response));
+    callback(null, response);
+  }
 };
 
 function startRecording(event, context, callback, targetURL, recordingName) {
