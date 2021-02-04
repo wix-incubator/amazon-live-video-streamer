@@ -19,7 +19,7 @@ class S3Utils {
   }
 
   getUrl() {
-    return new Promise(resolve, (reject) => {
+    return new Promise((resolve, reject) => {
       this.fileS3.getSignedUrl("getObject", (err, url) => {
         if (err) {
           reject(err);
