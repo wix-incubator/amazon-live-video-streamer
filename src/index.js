@@ -4,7 +4,7 @@
 "use strict";
 
 var AWS = require("aws-sdk");
-const { S3Utils } = require("../recording/utils/s3");
+const { S3Utils } = require("./s3");
 var ecs = new AWS.ECS();
 let s3;
 
@@ -51,7 +51,7 @@ exports.handler = function (event, context, callback) {
       response = {
         statusCode: 400,
         headers: {},
-        body: JSON.stringify(responseBody, null, " "),
+        body: JSON.stringify({ error: responseBody }, null, " "),
       };
       context.succeed(response);
       return false;
@@ -157,7 +157,7 @@ exports.handler = function (event, context, callback) {
           response = {
             statusCode: 500,
             headers: {},
-            body: JSON.stringify(responseBody, null, " "),
+            body: JSON.stringify({ error: responseBody }, null, " "),
           };
           context.succeed(response);
         });
@@ -173,7 +173,7 @@ exports.handler = function (event, context, callback) {
       response = {
         statusCode: 400,
         headers: {},
-        body: JSON.stringify(responseBody),
+        body: JSON.stringify({ error: responseBody }),
       };
   }
 
@@ -219,7 +219,7 @@ function startRecording(event, context, callback, targetURL, recordingName) {
     if (err) {
       console.log(err); // an error occurred
       response.statusCode = err.statusCode;
-      response.body = JSON.stringify(err, null, " ");
+      response.body = JSON.stringify({ error: err }, null, " ");
       context.succeed(response);
     } else {
       // TODO: always return JSON >>>object<<<
@@ -228,8 +228,8 @@ function startRecording(event, context, callback, targetURL, recordingName) {
       response.statusCode = 200;
       response.body = JSON.stringify(
         data.tasks.length && data.tasks[0].taskArn
-          ? data.tasks[0].taskArn
-          : data,
+          ? { taskArn: data.tasks[0].taskArn }
+          : { data },
         null,
         " "
       );
@@ -248,13 +248,13 @@ function stopRecording(event, context, taskId) {
     if (err) {
       console.log(err); // an error occurred
       response.statusCode = err.statusCode;
-      response.body = JSON.stringify(err, null, " ");
+      response.body = JSON.stringify({ error: err }, null, " ");
       context.succeed(response);
     } else {
       console.log(data); // successful response
       response.statusCode = 200;
       responseBody = data;
-      response.body = JSON.stringify(data, null, " ");
+      response.body = JSON.stringify({ data }, null, " ");
       console.log("Stop task succeeded.", response);
       context.succeed(response);
     }
