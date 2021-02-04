@@ -102,7 +102,7 @@ exports.handler = function (event, context, callback) {
         event.queryStringParameters.recordingName
       );
 
-      s3 = new S3Utils(recordingArtifactsBucket, recordingName);
+      s3 = new S3Utils(recordingArtifactsBucket, `${recordingName}.mp4`);
 
       s3.read().then((recording) => {
         response = {
@@ -133,7 +133,7 @@ exports.handler = function (event, context, callback) {
         event.queryStringParameters.recordingName
       );
 
-      s3 = new S3Utils(recordingArtifactsBucket, recordingName);
+      s3 = new S3Utils(recordingArtifactsBucket, `${recordingName}.mp4`);
 
       s3.remove()
         .then(() => {
