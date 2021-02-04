@@ -14,7 +14,7 @@ class S3Utils {
     this.key = key;
     this.fileS3 = new AWS.S3({ params: { Bucket: bucket, Key: key } });
     console.log(
-      `[upload process] constructed a S3 object with bucket: ${this.bucket}, key: ${this.key}`
+      `[S3] constructed a S3 object with bucket: ${this.bucket}, key: ${this.key}`
     );
   }
 

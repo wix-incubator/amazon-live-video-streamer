@@ -109,10 +109,14 @@ exports.handler = function (event, context, callback) {
 
       s3.getUrl()
         .then((url) => {
+          responseBody = {
+            url,
+          };
+
           response = {
             statusCode: 200,
             headers: {},
-            body: { url },
+            body: JSON.stringify(responseBody, null, " "),
           };
 
           console.log("download response: " + JSON.stringify(response));
