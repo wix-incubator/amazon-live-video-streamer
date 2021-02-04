@@ -151,6 +151,8 @@ exports.handler = function (event, context, callback) {
 
       s3 = new S3Utils(recordingArtifactsBucket, `${recordingName}.mp4`);
 
+      isAsync = true;
+
       s3.remove()
         .then(() => {
           responseBody = {
@@ -163,7 +165,9 @@ exports.handler = function (event, context, callback) {
             body: JSON.stringify(responseBody, null, " "),
           };
 
+          console.log("delete response: " + JSON.stringify(response));
           context.succeed(response);
+          callback(null, response);
         })
         .catch(() => {
           responseBody = {
@@ -176,6 +180,7 @@ exports.handler = function (event, context, callback) {
             body: JSON.stringify({ error: responseBody }, null, " "),
           };
           context.succeed(response);
+          callback(null, response);
         });
 
       break;
