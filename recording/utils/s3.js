@@ -20,7 +20,7 @@ class S3Utils {
 
   read() {
     return new Promise((resolve) => {
-      fileS3.getObject(params, (err, data) => {
+      this.fileS3.getObject(params, (err, data) => {
         if (err) {
           console.log(
             "[read process] - failure - error handling on failure",
@@ -39,7 +39,7 @@ class S3Utils {
 
   remove() {
     return new Promise((resolve) => {
-      fileS3.deleteObject((err, data) => {
+      this.fileS3.deleteObject((err, data) => {
         if (err) {
           console.log(
             "[remove process] - failure - error handling on failure",
