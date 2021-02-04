@@ -107,15 +107,12 @@ exports.handler = function (event, context, callback) {
 
       isAsync = true;
 
-      s3.read()
-        .then((recordingData) => {
+      s3.getUrl()
+        .then((url) => {
           response = {
             statusCode: 200,
-            headers: {
-              "Content-Type": recordingData.ContentType,
-              "Content-Length": recordingData.ContentLength,
-            },
-            body: recordingData.Body,
+            headers: {},
+            body: { url },
           };
 
           console.log("download response: " + JSON.stringify(response));

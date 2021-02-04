@@ -18,25 +18,35 @@ class S3Utils {
     );
   }
 
-  read() {
-    return new Promise((resolve) => {
-      this.fileS3.getObject((err, data) => {
+  getUrl() {
+    return new Promise(resolve, (reject) => {
+      this.fileS3.getSignedUrl("getObject", (err, url) => {
         if (err) {
-          console.log(
-            "[read process] - failure - error handling on failure",
-            err
-          );
-          throw err;
+          reject(err);
+        } else {
+          resolve(url);
         }
-
-        console.log(
-          `[read process] - success - video recording was retrieved: ${this.key}: `,
-          data
-        );
-
-        resolve(data);
       });
     });
+
+    // return new Promise((resolve) => {
+    //   this.fileS3.getObject((err, data) => {
+    //     if (err) {
+    //       console.log(
+    //         "[read process] - failure - error handling on failure",
+    //         err
+    //       );
+    //       throw err;
+    //     }
+
+    //     console.log(
+    //       `[read process] - success - video recording was retrieved: ${this.key}: `,
+    //       data
+    //     );
+
+    //     resolve(data);
+    //   });
+    // });
   }
 
   remove() {
