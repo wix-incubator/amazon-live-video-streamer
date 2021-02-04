@@ -104,7 +104,7 @@ exports.handler = function (event, context, callback) {
 
       s3 = new S3Utils(recordingArtifactsBucket, recordingName);
 
-      s3.read.then((recording) => {
+      s3.read().then((recording) => {
         response = {
           statusCode: 200,
           headers: {
