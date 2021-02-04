@@ -19,11 +19,18 @@ class S3Utils {
   }
 
   getUrl() {
+    console.log(`[get url process] launched`);
+
     return new Promise((resolve, reject) => {
       this.fileS3.getSignedUrl("getObject", (err, url) => {
         if (err) {
+          console.log(
+            `[get url process] - failure - failed to get signer URL`,
+            err
+          );
           reject(err);
         } else {
+          console.log(`[get url process] - success - formed url URL: `, url);
           resolve(url);
         }
       });
