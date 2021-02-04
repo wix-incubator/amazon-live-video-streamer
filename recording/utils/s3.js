@@ -34,7 +34,7 @@ class S3Utils {
           data
         );
 
-        resolve(data.Body);
+        resolve(data);
       });
     });
   }

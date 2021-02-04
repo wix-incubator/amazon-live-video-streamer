@@ -104,15 +104,14 @@ exports.handler = function (event, context, callback) {
 
       s3 = new S3Utils(recordingArtifactsBucket, `${recordingName}.mp4`);
 
-      s3.read().then((recording) => {
+      s3.read().then((recordingData) => {
         response = {
           statusCode: 200,
           headers: {
-            "Content-Type": "video/mp4",
-            "Content-Disposition": `attachment; filename="${recordingName}.mp4"`,
-            "Content-Length": Buffer.byteLength(recording),
+            "Content-Type": recordingData.ContentType,
+            "Content-Length": recordingData.ContentLength,
           },
-          body: recording,
+          body: recordingData.Body,
         };
 
         context.succeed(response);
