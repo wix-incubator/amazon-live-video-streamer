@@ -30,8 +30,10 @@ class S3Utils {
         }
 
         console.log(
-          `[read process] - success - video recording was retrieved: ${this.key}`
+          `[read process] - success - video recording was retrieved: ${this.key}: `,
+          data
         );
+
         resolve(data.Body);
       });
     });
