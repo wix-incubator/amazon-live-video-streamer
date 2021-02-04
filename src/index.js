@@ -30,7 +30,6 @@ exports.handler = function (event, context, callback) {
   let recordingName = "";
   let taskId = "";
   let action = "";
-  let asyncWait = false;
 
   console.log(event);
   responseBody.input = event;
@@ -105,9 +104,7 @@ exports.handler = function (event, context, callback) {
 
       s3 = new S3Utils(recordingArtifactsBucket, `${recordingName}.mp4`);
 
-      asyncWait = true;
-
-      s3.read().then((recordingData) => {
+      let readPromise = s3.read().then((recordingData) => {
         response = {
           statusCode: 200,
           headers: {
@@ -120,7 +117,7 @@ exports.handler = function (event, context, callback) {
         context.succeed(response);
       });
 
-      break;
+      return readPromise;
 
     case "delete":
       if (!ensureParameterExists("recordingName")) {
@@ -179,10 +176,8 @@ exports.handler = function (event, context, callback) {
       };
   }
 
-  if (!asyncWait) {
-    console.log("response: " + JSON.stringify(response));
-    callback(null, response);
-  }
+  console.log("response: " + JSON.stringify(response));
+  callback(null, response);
 };
 
 function startRecording(event, context, callback, targetURL, recordingName) {
