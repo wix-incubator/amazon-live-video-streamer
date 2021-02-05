@@ -188,7 +188,7 @@ exports.handler = function (event, context, callback) {
     default:
       responseBody = {
         message:
-          "Invalid parameter: recordingAction. Valid values 'start', 'stop', 'download', 'delete'",
+          "Invalid parameter: action. Valid values 'start', 'stop', 'download', 'delete'",
         input: event,
       };
       response = {
