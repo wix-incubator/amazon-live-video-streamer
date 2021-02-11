@@ -35,15 +35,34 @@ exports.handler = function (event, context, callback) {
   console.log(event);
   responseBody.input = event;
 
-  if (event.queryStringParameters && event.queryStringParameters.action) {
-    console.log("Recording action: " + event.queryStringParameters.action);
-    action = event.queryStringParameters.action;
-  }
+  let getParameter = (parameterName) => {
+    if (
+      event.queryStringParameters &&
+      event.queryStringParameters[parameterName]
+    ) {
+      return decodeURIComponent(event.queryStringParameters[parameterName]);
+    } else {
+      let parsedBody = {};
+
+      try {
+        parsedBody = JSON.parse(event.body);
+      } catch (e) {}
+
+      return parsedBody[parameterName];
+    }
+  };
 
   let ensureParameterExists = (parameterName) => {
+    let parsedBody = {};
+
+    try {
+      parsedBody = JSON.parse(event.body);
+    } catch (e) {}
+
     if (
-      !event.queryStringParameters ||
-      !event.queryStringParameters[parameterName]
+      (!event.queryStringParameters ||
+        !event.queryStringParameters[parameterName]) &&
+      !parsedBody[parameterName]
     ) {
       responseBody = {
         message: `Missing parameter: ${parameterName}`,
@@ -61,6 +80,9 @@ exports.handler = function (event, context, callback) {
     return true;
   };
 
+  console.log("Recording action: " + getParameter("action"));
+  action = getParameter("action");
+
   switch (action.toLowerCase()) {
     case "start":
       if (
@@ -70,14 +92,10 @@ exports.handler = function (event, context, callback) {
         break;
       }
 
-      console.log("Target URL: " + event.queryStringParameters.targetURL);
-      console.log(
-        "Recording file name: " + event.queryStringParameters.recordingName
-      );
-      targetURL = decodeURIComponent(event.queryStringParameters.targetURL);
-      recordingName = decodeURIComponent(
-        event.queryStringParameters.recordingName
-      );
+      console.log("Target URL: " + getParameter("targetURL"));
+      console.log("Recording file name: " + getParameter("recordingName"));
+      targetURL = getParameter("targetURL");
+      recordingName = getParameter("recordingName");
 
       return startRecording(event, context, callback, targetURL, recordingName);
 
@@ -86,8 +104,8 @@ exports.handler = function (event, context, callback) {
         break;
       }
 
-      console.log("ECS task ID: " + event.queryStringParameters.taskId);
-      taskId = event.queryStringParameters.taskId;
+      console.log("ECS task ID: " + getParameter("taskId"));
+      taskId = getParameter("taskId");
       return stopRecording(event, context, taskId);
 
     case "download":
@@ -95,13 +113,8 @@ exports.handler = function (event, context, callback) {
         break;
       }
 
-      console.log(
-        "Recording file name: " + event.queryStringParameters.recordingName
-      );
-
-      recordingName = decodeURIComponent(
-        event.queryStringParameters.recordingName
-      );
+      console.log("Recording file name: " + getParameter("recordingName"));
+      recordingName = getParameter("recordingName");
 
       s3 = new S3Utils(recordingArtifactsBucket, `${recordingName}.mp4`);
 
@@ -141,13 +154,8 @@ exports.handler = function (event, context, callback) {
         break;
       }
 
-      console.log(
-        "Recording file name: " + event.queryStringParameters.recordingName
-      );
-
-      recordingName = decodeURIComponent(
-        event.queryStringParameters.recordingName
-      );
+      console.log("Recording file name: " + getParameter("recordingName"));
+      recordingName = getParameter("recordingName");
 
       s3 = new S3Utils(recordingArtifactsBucket, `${recordingName}.mp4`);
 
