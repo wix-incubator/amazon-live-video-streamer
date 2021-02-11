@@ -5,7 +5,7 @@
 
 set -xeo pipefail
 
-BROWSER_URL="${TARGET_URL}"
+BROWSER_URL="${TARGET_URL}&recorder=1"
 SCREEN_WIDTH=${RECORDING_SCREEN_WIDTH:-'1280'}
 SCREEN_HEIGHT=${RECORDING_SCREEN_HEIGHT:-'720'}
 SCREEN_RESOLUTION=${SCREEN_WIDTH}x${SCREEN_HEIGHT}
@@ -69,5 +69,6 @@ sleep 0.5  # Ensure this has started before moving on
 xdotool mousemove 1 1 click 1  # Move mouse out of the way so it doesn't trigger the "pause" overlay on the video tile
 
 sleep 2  # Allow some time for website to load
+xdotool mousemove 1 1 click 1  # User action to enable video
 exec node /recording/record.js ${S3_BUCKET_NAME} ${SCREEN_WIDTH} ${SCREEN_HEIGHT}
 
