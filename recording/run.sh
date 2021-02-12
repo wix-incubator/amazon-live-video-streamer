@@ -68,7 +68,13 @@ firefox \
 sleep 0.5  # Ensure this has started before moving on
 xdotool mousemove 1 1 click 1  # Move mouse out of the way so it doesn't trigger the "pause" overlay on the video tile
 
-sleep 2  # Allow some time for website to load
-xdotool mousemove 1 1 click 1  # User action to enable video
+# Let's make sure user action is performed to show video
+while /bin/true; do
+  # Since we do not know whether we joined yet -
+  # keep clicking harmlessly forever in a separate thread
+  xdotool mousemove 1 1 click 1
+  sleep 1
+done &
+
 exec node /recording/record.js ${S3_BUCKET_NAME} ${SCREEN_WIDTH} ${SCREEN_HEIGHT}
 
