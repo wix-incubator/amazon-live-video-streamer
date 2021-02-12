@@ -3,7 +3,7 @@
 
 "use strict";
 
-console.log("v1wix");
+console.log("v2wix");
 
 var AWS = require("aws-sdk");
 const { S3Utils } = require("./s3");

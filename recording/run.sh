@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-echo v1wix
+echo v2wix
 
 set -xeo pipefail
 
@@ -67,8 +67,8 @@ firefox \
   --kiosk \
   --ssb ${BROWSER_URL} \
   &
-sleep 0.5  # Ensure this has started before moving on
-xdotool mousemove 1 1 click 1  # Move mouse out of the way so it doesn't trigger the "pause" overlay on the video tile
+# sleep 0.5  # Ensure this has started before moving on
+# xdotool mousemove 1 1 click 1  # Move mouse out of the way so it doesn't trigger the "pause" overlay on the video tile
 
 # Let's make sure user action is performed to show video
 while true; do
@@ -77,6 +77,8 @@ while true; do
   xdotool mousemove 1 1 click 1
   sleep 1
 done &
+
+sleep 5 # Skip part of long loading procedure...
 
 exec node /recording/record.js ${S3_BUCKET_NAME} ${SCREEN_WIDTH} ${SCREEN_HEIGHT}
 
