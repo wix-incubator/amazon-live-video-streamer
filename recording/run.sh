@@ -3,7 +3,7 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
-echo v2wix
+echo v3wix
 
 set -xeo pipefail
 
@@ -78,7 +78,7 @@ while true; do
   sleep 1
 done &
 
-sleep 5 # Skip part of long loading procedure...
+sleep 7 # Skip part of long loading procedure...
 
 exec node /recording/record.js ${S3_BUCKET_NAME} ${SCREEN_WIDTH} ${SCREEN_HEIGHT}
 
