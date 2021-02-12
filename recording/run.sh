@@ -3,6 +3,8 @@
 # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
 # SPDX-License-Identifier: Apache-2.0
 
+echo v1wix
+
 set -xeo pipefail
 
 BROWSER_URL="${TARGET_URL}&recorder=1"

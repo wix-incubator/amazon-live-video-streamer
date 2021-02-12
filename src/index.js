@@ -3,6 +3,8 @@
 
 "use strict";
 
+console.log("v1wix");
+
 var AWS = require("aws-sdk");
 const { S3Utils } = require("./s3");
 var ecs = new AWS.ECS();
