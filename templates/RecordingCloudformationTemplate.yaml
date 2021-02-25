@@ -77,57 +77,12 @@ Resources:
         AccessControl: BucketOwnerFullControl
         BucketName:
           Fn::Join: ['', ['live-video-', {Ref: 'AWS::AccountId'}, '-', {Ref: 'AWS::Region'}, '-recordings']]
-  RecordingLambdaExecutionRole:
-    Type: AWS::IAM::Role
-    Properties:
-        ManagedPolicyArns:
-        - 'arn:aws:iam::aws:policy/CloudWatchLogsFullAccess'
-        - 'arn:aws:iam::aws:policy/AmazonECS_FullAccess'
-        - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
-        AssumeRolePolicyDocument:
-            Statement:
-            - Action: ['sts:AssumeRole']
-              Effect: Allow
-              Principal:
-                Service: [lambda.amazonaws.com]
-            Version: '2012-10-17'
-  
   RecordingBuildDeployGroup:
     Type: AWS::Logs::LogGroup
     Properties:
       LogGroupName: 
         Ref: RecordingLogGroupName
       RetentionInDays: 365
-  
-  RecordingLambdaFunction:
-    Type: 'AWS::Serverless::Function'
-    Properties:
-      FunctionName: RecordingLambda
-      Description: Lambda to interact with ECS for starting and stopping recording.
-      Handler: index.handler
-      Role: 
-        Fn::GetAtt: [RecordingLambdaExecutionRole, Arn]
-      Runtime: nodejs12.x
-      Timeout: 300
-      MemorySize: 3008
-      Environment:
-        Variables:
-          ecsClusterArn:
-            Fn::GetAtt: [ECSCluster, Arn]
-          ecsContainerName: 
-            Ref: ECSContainerName
-          ecsTaskDefinitionArn: 
-            Ref: ECSRecordingTaskDefinition
-          recordingArtifactsBucket:
-            Ref: RecordingArtifactsUploadBucket
-      CodeUri: ../src/
-      Events:
-        Api1:
-          Type: Api
-          Properties:
-            Path: /recording
-            Method: POST
-  
   ECSRecordingTaskDefinition:
     Type: 'AWS::ECS::TaskDefinition'
     Properties:
