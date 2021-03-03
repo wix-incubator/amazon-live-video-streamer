@@ -75,7 +75,7 @@ const getTaskDefinition = () => ({
         environment: [
           {
             name: "RECORDER_DELAY",
-            value: 7,
+            value: "7",
           },
           {
             name: "TARGET_URL",
