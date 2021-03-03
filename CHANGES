@@ -6,3 +6,6 @@ In order to be suitable for usage by Wix, library has been modified:
   * Removed/changed code comments which are no longer suitable after code changes
   * Changed URL query param names to have them more generic
   * Output file name/path was made configurable, path was simplified, bucket renamed
+  * Delay before recording starts made configurable
+  * Moved src to lambda and added tests
+  * Refactored lambda code

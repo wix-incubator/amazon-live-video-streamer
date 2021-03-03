@@ -4,11 +4,6 @@
 const AWS = require("aws-sdk");
 
 class S3Utils {
-  /**
-   * @constructor
-   * @param {*} bucket - the S3 bucket name uploaded to
-   * @param {*} key - the file name in S3 bucket
-   */
   constructor(bucket, key) {
     this.bucket = bucket;
     this.key = key;
@@ -16,65 +11,6 @@ class S3Utils {
     console.log(
       `[S3] constructed a S3 object with bucket: ${this.bucket}, key: ${this.key}`
     );
-  }
-
-  getUrl() {
-    console.log(`[get url process] launched`);
-
-    return new Promise((resolve, reject) => {
-      let params = { Bucket: this.bucket, Key: this.key };
-
-      this.fileS3.getSignedUrl("getObject", params, (err, url) => {
-        if (err) {
-          console.log(
-            `[get url process] - failure - failed to get signer URL`,
-            err
-          );
-          reject(err);
-        } else {
-          console.log(`[get url process] - success - formed url URL: `, url);
-          resolve(url);
-        }
-      });
-    });
-
-    // return new Promise((resolve) => {
-    //   this.fileS3.getObject((err, data) => {
-    //     if (err) {
-    //       console.log(
-    //         "[read process] - failure - error handling on failure",
-    //         err
-    //       );
-    //       throw err;
-    //     }
-
-    //     console.log(
-    //       `[read process] - success - video recording was retrieved: ${this.key}: `,
-    //       data
-    //     );
-
-    //     resolve(data);
-    //   });
-    // });
-  }
-
-  remove() {
-    return new Promise((resolve) => {
-      this.fileS3.deleteObject((err, data) => {
-        if (err) {
-          console.log(
-            "[remove process] - failure - error handling on failure",
-            err
-          );
-          throw err;
-        }
-
-        console.log(
-          `[remove process] - success - video recording was removed: ${this.key}`
-        );
-        resolve();
-      });
-    });
   }
 
   uploadStream(stream) {

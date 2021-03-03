@@ -3,310 +3,130 @@
 
 "use strict";
 
-console.log("Version: 4-wix");
+const VERSION = 5;
 
-const AWS = require("aws-sdk");
-const { S3Utils } = require("./s3");
-const ecs = new AWS.ECS();
-let s3;
+console.log(`Version: ${VERSION}-wix`);
 
-const ecsClusterArn = process.env.ecsClusterArn;
-const ecsTaskDefinitionArn = process.env.ecsTaskDefinitionArn;
-const ecsContainerName = process.env.ecsContainerName;
+const { S3Utils } = require("./utils/s3");
+const { Params } = require("./utils/params");
+const { respondFactory } = require("./utils/response");
+const { startRecording, stopRecording } = require("./utils/recording");
+const { setNamespace, log } = require("./utils/log");
+
 const recordingArtifactsBucket = process.env.recordingArtifactsBucket;
 
-let responseBody = {
-  message: "",
-};
-
-let response = {
-  statusCode: 200,
-  headers: {},
-  body: "",
-};
-
 exports.handler = function (event, context, callback) {
-  let targetURL = "";
-  let recordingName = "";
-  let taskId = "";
-  let action = "";
-  let isAsync = false;
-  let responded = false;
+  setNamespace("Handler");
 
-  const respond = (response) => {
-    if (!responded) {
-      context.succeed(response);
-      callback(null, response);
-      responded = true;
-    }
+  const respond = respondFactory(context, callback);
+  const params = new Params(event, respond);
+
+  log("Received event: ", event);
+
+  const action = (params.get("action") || "").toLowerCase();
+
+  log("Handling action: ", action);
+
+  const parametersConfig = {
+    start: ["targetURL", "recordingName"],
+    stop: ["taskId"],
+    download: ["recordingName"],
+    delete: ["recordingName"],
   };
 
-  console.log("Received event: ", event);
+  log("Required parameters configuration: ", parametersConfig);
 
-  let getParameter = (parameterName) => {
-    if (
-      event.queryStringParameters &&
-      event.queryStringParameters[parameterName]
-    ) {
-      return decodeURIComponent(event.queryStringParameters[parameterName]);
-    } else {
-      let parsedBody = {};
+  const parametersValid = params.ensureAllExist(parametersConfig, action);
 
-      try {
-        parsedBody = JSON.parse(event.body);
-      } catch (e) {}
+  if (parametersValid) {
+    switch (action) {
+      case "start":
+        setNamespace(action);
 
-      return parsedBody[parameterName];
-    }
-  };
+        return startRecording(
+          respond,
+          params.get("targetURL"),
+          params.get("recordingName")
+        );
+      case "stop":
+        setNamespace(action);
 
-  let ensureParameterExists = (parameterName) => {
-    let parsedBody = {};
+        return stopRecording(respond, params.get("taskId"));
+      case "download":
+        setNamespace(action);
 
-    try {
-      parsedBody = JSON.parse(event.body);
-    } catch (e) {}
+        new S3Utils(
+          recordingArtifactsBucket,
+          `${params.get("recordingName")}.mp4`
+        )
+          .getUrl()
+          .then((url) => {
+            respond({
+              statusCode: 200,
+              body: JSON.stringify(
+                {
+                  url,
+                },
+                null,
+                " "
+              ),
+            });
+          })
+          .catch((e) => {
+            respond({
+              statusCode: e.statusCode,
+              headers: {},
+              body: JSON.stringify(
+                {
+                  error: e,
+                },
+                null,
+                " "
+              ),
+            });
+          });
 
-    if (
-      (!event.queryStringParameters ||
-        !event.queryStringParameters[parameterName]) &&
-      !parsedBody[parameterName]
-    ) {
-      responseBody = {
-        message: `Missing parameter: ${parameterName}`,
-      };
-      response = {
-        statusCode: 400,
-        headers: {},
-        body: JSON.stringify({ error: responseBody }, null, " "),
-      };
-      respond(response);
-      return false;
-    }
-
-    return true;
-  };
-
-  console.log("Recording action: " + getParameter("action"));
-  action = getParameter("action");
-
-  switch ((action || "").toLowerCase()) {
-    case "start":
-      if (
-        !ensureParameterExists("targetURL") ||
-        !ensureParameterExists("recordingName")
-      ) {
         break;
-      }
 
-      console.log("Target URL: " + getParameter("targetURL"));
-      console.log("Recording file name: " + getParameter("recordingName"));
-      targetURL = getParameter("targetURL");
-      recordingName = getParameter("recordingName");
+      case "delete":
+        setNamespace(action);
 
-      return startRecording(event, respond, targetURL, recordingName);
+        new S3Utils(
+          recordingArtifactsBucket,
+          `${params.get("recordingName")}.mp4`
+        )
+          .remove()
+          .then(() => {
+            respond({
+              statusCode: 200,
+              body: JSON.stringify(
+                {
+                  message: `OK`,
+                },
+                null,
+                " "
+              ),
+            });
+          })
+          .catch((e) => {
+            respond({
+              statusCode: e.statusCode,
+              body: JSON.stringify({ error: e }, null, " "),
+            });
+          });
 
-    case "stop":
-      if (!ensureParameterExists("taskId")) {
         break;
-      }
 
-      console.log("ECS task ID: " + getParameter("taskId"));
-      taskId = getParameter("taskId");
-      return stopRecording(event, respond, taskId);
-
-    case "download":
-      if (!ensureParameterExists("recordingName")) {
-        break;
-      }
-
-      console.log("Recording file name: " + getParameter("recordingName"));
-      recordingName = getParameter("recordingName");
-
-      s3 = new S3Utils(recordingArtifactsBucket, `${recordingName}.mp4`);
-
-      isAsync = true;
-
-      s3.getUrl()
-        .then((url) => {
-          responseBody = {
-            url,
-          };
-
-          response = {
-            statusCode: 200,
-            headers: {},
-            body: JSON.stringify(responseBody, null, " "),
-          };
-
-          console.log("download response: " + JSON.stringify(response));
-          respond(response);
-          callback(null, response);
-        })
-        .catch((e) => {
-          response = {
-            statusCode: e.statusCode,
-            headers: {},
-            body: JSON.stringify(
-              {
-                error: e,
-              },
-              null,
-              " "
-            ),
-          };
-
-          respond(response);
-          callback(null, response);
+      default:
+        respond({
+          statusCode: 400,
+          body: JSON.stringify({
+            error: {
+              message:
+                "Invalid parameter: action. Valid values 'start', 'stop', 'download', 'delete'",
+            },
+          }),
         });
-
-      break;
-
-    case "delete":
-      if (!ensureParameterExists("recordingName")) {
-        break;
-      }
-
-      console.log("Recording file name: " + getParameter("recordingName"));
-      recordingName = getParameter("recordingName");
-
-      s3 = new S3Utils(recordingArtifactsBucket, `${recordingName}.mp4`);
-
-      isAsync = true;
-
-      s3.remove()
-        .then(() => {
-          responseBody = {
-            message: `OK`,
-          };
-
-          response = {
-            statusCode: 200,
-            headers: {},
-            body: JSON.stringify(responseBody, null, " "),
-          };
-
-          console.log("delete response: " + JSON.stringify(response));
-          respond(response);
-        })
-        .catch((e) => {
-          response = {
-            statusCode: e.statusCode,
-            headers: {},
-            body: JSON.stringify({ error: e }, null, " "),
-          };
-          respond(response);
-        });
-
-      break;
-
-    default:
-      responseBody = {
-        message:
-          "Invalid parameter: action. Valid values 'start', 'stop', 'download', 'delete'",
-      };
-      response = {
-        statusCode: 400,
-        headers: {},
-        body: JSON.stringify({ error: responseBody }),
-      };
-  }
-
-  if (!isAsync) {
-    console.log("Response: " + JSON.stringify(response));
-    respond(response);
+    }
   }
 };
-
-function startRecording(event, respond, targetURL, recordingName) {
-  let ecsRunTaskParams = {
-    cluster: ecsClusterArn,
-    launchType: "EC2",
-    count: 1,
-    overrides: {
-      containerOverrides: [
-        {
-          environment: [
-            {
-              name: "RECORDER_DELAY",
-              value: 7,
-            },
-            {
-              name: "TARGET_URL",
-              value: targetURL,
-            },
-            {
-              name: "OUTPUT_FILE_NAME",
-              value: recordingName,
-            },
-            {
-              name: "RECORDING_ARTIFACTS_BUCKET",
-              value: recordingArtifactsBucket,
-            },
-          ],
-          name: ecsContainerName,
-        },
-      ],
-    },
-    placementConstraints: [
-      {
-        type: "distinctInstance",
-      },
-    ],
-    taskDefinition: ecsTaskDefinitionArn,
-  };
-
-  ecs.runTask(ecsRunTaskParams, function (err, data) {
-    if (err) {
-      console.log(err); // an error occurred
-      response.statusCode = err.statusCode;
-      response.body = JSON.stringify({ error: err }, null, 1);
-      respond(response);
-    } else {
-      console.log("Response:", data);
-
-      if (data.tasks.length && data.tasks[0].taskArn) {
-        response.statusCode = 200;
-
-        response.body = JSON.stringify(
-          { taskArn: data.tasks[0].taskArn },
-          null,
-          1
-        );
-      } else {
-        response.statusCode = 500;
-
-        response.body = JSON.stringify(
-          { error: { message: "Failed to start recording task!" } },
-          null,
-          1
-        );
-      }
-
-      respond(response);
-    }
-  });
-}
-
-function stopRecording(event, respond, taskId) {
-  let ecsStopTaskParam = {
-    cluster: ecsClusterArn,
-    task: taskId,
-  };
-
-  ecs.stopTask(ecsStopTaskParam, function (err, data) {
-    if (err) {
-      console.log(err); // an error occurred
-      response.statusCode = err.statusCode;
-      response.body = JSON.stringify({ error: err }, null, 1);
-      respond(response);
-    } else {
-      console.log(data); // successful response
-      response.statusCode = 200;
-      responseBody = data;
-      response.body = JSON.stringify({ data }, null, 1);
-      console.log("Stop task succeeded.", response);
-      respond(response);
-    }
-  });
-}

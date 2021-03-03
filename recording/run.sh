@@ -8,6 +8,8 @@ echo v3wix
 set -xeo pipefail
 
 : "${RECORDER_DELAY:=7}"
+: "${UNBLOCK_CLICK_X:=1}"
+: "${UNBLOCK_CLICK_Y:=100}"
 BROWSER_URL="${TARGET_URL}"
 SCREEN_WIDTH=${RECORDING_SCREEN_WIDTH:-'1280'}
 SCREEN_HEIGHT=${RECORDING_SCREEN_HEIGHT:-'720'}
@@ -75,7 +77,7 @@ firefox \
 while true; do
   # Since we do not know whether we joined yet -
   # keep clicking harmlessly forever in a separate thread
-  xdotool mousemove 1 100 click 1
+  xdotool mousemove $UNBLOCK_CLICK_X $UNBLOCK_CLICK_Y click 1
   sleep 1
 done &
 
