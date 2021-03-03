@@ -3,14 +3,13 @@
 
 "use strict";
 
-console.log("v3wix");
+console.log("Version: 4-wix");
 
-var AWS = require("aws-sdk");
+const AWS = require("aws-sdk");
 const { S3Utils } = require("./s3");
-var ecs = new AWS.ECS();
+const ecs = new AWS.ECS();
 let s3;
 
-// Reading environment variables
 const ecsClusterArn = process.env.ecsClusterArn;
 const ecsTaskDefinitionArn = process.env.ecsTaskDefinitionArn;
 const ecsContainerName = process.env.ecsContainerName;
@@ -18,7 +17,6 @@ const recordingArtifactsBucket = process.env.recordingArtifactsBucket;
 
 let responseBody = {
   message: "",
-  input: "",
 };
 
 let response = {
@@ -33,9 +31,17 @@ exports.handler = function (event, context, callback) {
   let taskId = "";
   let action = "";
   let isAsync = false;
+  let responded = false;
 
-  console.log(event);
-  responseBody.input = event;
+  const respond = (response) => {
+    if (!responded) {
+      context.succeed(response);
+      callback(null, response);
+      responded = true;
+    }
+  };
+
+  console.log("Received event: ", event);
 
   let getParameter = (parameterName) => {
     if (
@@ -68,14 +74,13 @@ exports.handler = function (event, context, callback) {
     ) {
       responseBody = {
         message: `Missing parameter: ${parameterName}`,
-        input: event,
       };
       response = {
         statusCode: 400,
         headers: {},
         body: JSON.stringify({ error: responseBody }, null, " "),
       };
-      context.succeed(response);
+      respond(response);
       return false;
     }
 
@@ -85,7 +90,7 @@ exports.handler = function (event, context, callback) {
   console.log("Recording action: " + getParameter("action"));
   action = getParameter("action");
 
-  switch (action.toLowerCase()) {
+  switch ((action || "").toLowerCase()) {
     case "start":
       if (
         !ensureParameterExists("targetURL") ||
@@ -99,7 +104,7 @@ exports.handler = function (event, context, callback) {
       targetURL = getParameter("targetURL");
       recordingName = getParameter("recordingName");
 
-      return startRecording(event, context, callback, targetURL, recordingName);
+      return startRecording(event, respond, targetURL, recordingName);
 
     case "stop":
       if (!ensureParameterExists("taskId")) {
@@ -108,7 +113,7 @@ exports.handler = function (event, context, callback) {
 
       console.log("ECS task ID: " + getParameter("taskId"));
       taskId = getParameter("taskId");
-      return stopRecording(event, context, taskId);
+      return stopRecording(event, respond, taskId);
 
     case "download":
       if (!ensureParameterExists("recordingName")) {
@@ -135,17 +140,23 @@ exports.handler = function (event, context, callback) {
           };
 
           console.log("download response: " + JSON.stringify(response));
-          context.succeed(response);
+          respond(response);
           callback(null, response);
         })
         .catch((e) => {
           response = {
-            statusCode: 500,
+            statusCode: e.statusCode,
             headers: {},
-            body: JSON.stringify({ error: e }, null, " "),
+            body: JSON.stringify(
+              {
+                error: e,
+              },
+              null,
+              " "
+            ),
           };
 
-          context.succeed(response);
+          respond(response);
           callback(null, response);
         });
 
@@ -176,21 +187,15 @@ exports.handler = function (event, context, callback) {
           };
 
           console.log("delete response: " + JSON.stringify(response));
-          context.succeed(response);
-          callback(null, response);
+          respond(response);
         })
-        .catch(() => {
-          responseBody = {
-            message: `Could not delete recording: ${recordingName}`,
-            input: event,
-          };
+        .catch((e) => {
           response = {
-            statusCode: 500,
+            statusCode: e.statusCode,
             headers: {},
-            body: JSON.stringify({ error: responseBody }, null, " "),
+            body: JSON.stringify({ error: e }, null, " "),
           };
-          context.succeed(response);
-          callback(null, response);
+          respond(response);
         });
 
       break;
@@ -199,7 +204,6 @@ exports.handler = function (event, context, callback) {
       responseBody = {
         message:
           "Invalid parameter: action. Valid values 'start', 'stop', 'download', 'delete'",
-        input: event,
       };
       response = {
         statusCode: 400,
@@ -209,12 +213,12 @@ exports.handler = function (event, context, callback) {
   }
 
   if (!isAsync) {
-    console.log("response: " + JSON.stringify(response));
-    callback(null, response);
+    console.log("Response: " + JSON.stringify(response));
+    respond(response);
   }
 };
 
-function startRecording(event, context, callback, targetURL, recordingName) {
+function startRecording(event, respond, targetURL, recordingName) {
   let ecsRunTaskParams = {
     cluster: ecsClusterArn,
     launchType: "EC2",
@@ -223,6 +227,10 @@ function startRecording(event, context, callback, targetURL, recordingName) {
       containerOverrides: [
         {
           environment: [
+            {
+              name: "RECORDER_DELAY",
+              value: 7,
+            },
             {
               name: "TARGET_URL",
               value: targetURL,
@@ -252,26 +260,35 @@ function startRecording(event, context, callback, targetURL, recordingName) {
     if (err) {
       console.log(err); // an error occurred
       response.statusCode = err.statusCode;
-      response.body = JSON.stringify({ error: err }, null, " ");
-      context.succeed(response);
+      response.body = JSON.stringify({ error: err }, null, 1);
+      respond(response);
     } else {
-      // TODO: always return JSON >>>object<<<
+      console.log("Response:", data);
 
-      console.log(data); // successful response
-      response.statusCode = 200;
-      response.body = JSON.stringify(
-        data.tasks.length && data.tasks[0].taskArn
-          ? { taskArn: data.tasks[0].taskArn }
-          : { data },
-        null,
-        " "
-      );
-      context.succeed(response);
+      if (data.tasks.length && data.tasks[0].taskArn) {
+        response.statusCode = 200;
+
+        response.body = JSON.stringify(
+          { taskArn: data.tasks[0].taskArn },
+          null,
+          1
+        );
+      } else {
+        response.statusCode = 500;
+
+        response.body = JSON.stringify(
+          { error: { message: "Failed to start recording task!" } },
+          null,
+          1
+        );
+      }
+
+      respond(response);
     }
   });
 }
 
-function stopRecording(event, context, taskId) {
+function stopRecording(event, respond, taskId) {
   let ecsStopTaskParam = {
     cluster: ecsClusterArn,
     task: taskId,
@@ -281,15 +298,15 @@ function stopRecording(event, context, taskId) {
     if (err) {
       console.log(err); // an error occurred
       response.statusCode = err.statusCode;
-      response.body = JSON.stringify({ error: err }, null, " ");
-      context.succeed(response);
+      response.body = JSON.stringify({ error: err }, null, 1);
+      respond(response);
     } else {
       console.log(data); // successful response
       response.statusCode = 200;
       responseBody = data;
-      response.body = JSON.stringify({ data }, null, " ");
+      response.body = JSON.stringify({ data }, null, 1);
       console.log("Stop task succeeded.", response);
-      context.succeed(response);
+      respond(response);
     }
   });
 }

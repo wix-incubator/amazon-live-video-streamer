@@ -120,7 +120,7 @@ Resources:
             Ref: ECSRecordingTaskDefinition
           recordingArtifactsBucket:
             Ref: RecordingArtifactsUploadBucket
-      CodeUri: ../src/
+      CodeUri: ../lambda/
       Events:
         Api1:
           Type: Api

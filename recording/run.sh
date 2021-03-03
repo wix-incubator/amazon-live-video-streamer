@@ -7,7 +7,8 @@ echo v3wix
 
 set -xeo pipefail
 
-BROWSER_URL="${TARGET_URL}&recorder=1"
+: "${RECORDER_DELAY:=7}"
+BROWSER_URL="${TARGET_URL}"
 SCREEN_WIDTH=${RECORDING_SCREEN_WIDTH:-'1280'}
 SCREEN_HEIGHT=${RECORDING_SCREEN_HEIGHT:-'720'}
 SCREEN_RESOLUTION=${SCREEN_WIDTH}x${SCREEN_HEIGHT}
@@ -74,11 +75,11 @@ firefox \
 while true; do
   # Since we do not know whether we joined yet -
   # keep clicking harmlessly forever in a separate thread
-  xdotool mousemove 1 1 click 1
+  xdotool mousemove 1 100 click 1
   sleep 1
 done &
 
-sleep 7 # Skip part of long loading procedure...
+sleep $RECORDER_DELAY # Skip part of long loading procedure...
 
 exec node /recording/record.js ${S3_BUCKET_NAME} ${SCREEN_WIDTH} ${SCREEN_HEIGHT}
 

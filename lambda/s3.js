@@ -30,32 +30,13 @@ class S3Utils {
             `[get url process] - failure - failed to get signer URL`,
             err
           );
-          reject(err);
+          reject({ ...err, statusCode: 500 });
         } else {
           console.log(`[get url process] - success - formed url URL: `, url);
           resolve(url);
         }
       });
     });
-
-    // return new Promise((resolve) => {
-    //   this.fileS3.getObject((err, data) => {
-    //     if (err) {
-    //       console.log(
-    //         "[read process] - failure - error handling on failure",
-    //         err
-    //       );
-    //       throw err;
-    //     }
-
-    //     console.log(
-    //       `[read process] - success - video recording was retrieved: ${this.key}: `,
-    //       data
-    //     );
-
-    //     resolve(data);
-    //   });
-    // });
   }
 
   remove() {
@@ -66,7 +47,7 @@ class S3Utils {
             "[remove process] - failure - error handling on failure",
             err
           );
-          throw err;
+          throw { ...err, statusCode: 500 };
         }
 
         console.log(
