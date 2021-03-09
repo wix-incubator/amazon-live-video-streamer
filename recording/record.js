@@ -138,7 +138,7 @@ recordingDurationInterval = setInterval(() => {
 
   if (remainingSeconds < 0) {
     clearInterval(recordingDurationInterval);
-    console.log("[recording process] emergency kill - task running too long");
+    console.log("[recording process] task is running for too long - killing");
     process.kill(transcodeStreamToOutput.pid, "SIGTERM");
     process.exit(1);
   }
