@@ -35,7 +35,7 @@ const DISPLAY = process.env.DISPLAY;
 const MAX_RECORDING_DURATION = 60; // DEBUG ONLY
 
 let remainingSeconds = MAX_RECORDING_DURATION;
-const recordingDurationInterval;
+let recordingDurationInterval;
 
 const transcodeStreamToOutput = spawn("ffmpeg", [
   "-hide_banner",
