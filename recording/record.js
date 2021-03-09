@@ -28,6 +28,15 @@ const AUDIO_SAMPLERATE = 44100;
 const AUDIO_CHANNELS = 2;
 const DISPLAY = process.env.DISPLAY;
 
+// Maximum meeting duration is 4 hours.
+// We will forcefully kill recorder if it does not end after 4h 30min
+// const MAX_RECORDING_DURATION = 4.5 * 60 * 60;
+
+const MAX_RECORDING_DURATION = 60; // DEBUG ONLY
+
+let remainingSeconds = MAX_RECORDING_DURATION;
+const recordingDurationInterval;
+
 const transcodeStreamToOutput = spawn("ffmpeg", [
   "-hide_banner",
   "-loglevel",
@@ -107,6 +116,7 @@ process.on("SIGTERM", (code, signal) => {
   console.log(
     `[recording process] exited with code ${code} and signal ${signal}(SIGTERM)`
   );
+  clearInterval(recordingDurationInterval);
   process.kill(transcodeStreamToOutput.pid, "SIGTERM");
 });
 
@@ -115,9 +125,21 @@ process.on("SIGINT", (code, signal) => {
   console.log(
     `[recording process] exited with code ${code} and signal ${signal}(SIGINT)`
   );
+  clearInterval(recordingDurationInterval);
   process.kill("SIGTERM");
 });
 
 process.on("exit", function (code) {
+  clearInterval(recordingDurationInterval);
   console.log("[recording process] exit code", code);
 });
+
+recordingDurationInterval = setInterval(() => {
+  remainingSeconds--;
+
+  if (remainingSeconds < 0) {
+    clearInterval(recordingDurationInterval);
+    process.kill(transcodeStreamToOutput.pid, "SIGTERM");
+    process.exit(1);
+  }
+}, 1000);

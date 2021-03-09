@@ -3,7 +3,7 @@
 
 "use strict";
 
-const VERSION = 8;
+const VERSION = 9;
 
 console.log(`Version: ${VERSION}-wix`);
 
