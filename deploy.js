@@ -252,6 +252,8 @@ autoScalingGroupInstances.forEach((instance) => {
   instanceIds.push(instance.InstanceId);
 });
 
+console.log("Instance ids: ", instanceIds);
+
 spawnOrFail("aws", [
   "autoscaling",
   "set-instance-protection",
