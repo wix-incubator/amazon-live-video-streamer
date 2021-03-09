@@ -261,8 +261,7 @@ spawnOrFail("aws", [
   `${autoScalingGroupName}`,
   "--protected-from-scale-in",
   "--instance-ids",
-  `${instanceIds[0]}`,
-  `${instanceIds[1]}`,
+  ...instanceIds,
 ]);
 
 // Create a capacity provider with managed scale-in
