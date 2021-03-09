@@ -18,6 +18,10 @@ const startRecording = (respond, targetURL, recordingName) => {
         {
           environment: [
             {
+              name: "MAX_RECORDING_DURATION", // TEMPORARY TEST
+              value: "60",
+            },
+            {
               name: "RECORDER_DELAY",
               value: "7",
             },
