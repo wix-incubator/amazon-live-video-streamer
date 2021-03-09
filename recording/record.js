@@ -30,11 +30,10 @@ const DISPLAY = process.env.DISPLAY;
 
 // Maximum meeting duration is 4 hours.
 // We will forcefully kill recorder if it does not end after 4h 30min
-// const MAX_RECORDING_DURATION = process.env.MAX_RECORDING_DURATION || (4.5 * 60 * 60);
+const MAX_RECORDING_DURATION =
+  process.env.MAX_RECORDING_DURATION || 4.5 * 60 * 60;
 
-const MAX_RECORDING_DURATION = process.env.MAX_RECORDING_DURATION || 60; // DEBUG ONLY
-
-let remainingSeconds = MAX_RECORDING_DURATION;
+let remainingSeconds = Number(MAX_RECORDING_DURATION);
 let recordingDurationInterval;
 
 const transcodeStreamToOutput = spawn("ffmpeg", [
