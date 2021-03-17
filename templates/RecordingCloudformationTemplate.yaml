@@ -31,7 +31,7 @@ Parameters:
     Description: 'ARN of the docker image stored in ECR along with the tag'
   EcsAsgMinSize:
     Type: Number
-    Default: 5
+    Default: 2
   EcsAsgMaxSize:
     Type: Number
     Default: 1000
