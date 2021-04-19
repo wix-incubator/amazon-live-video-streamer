@@ -270,8 +270,8 @@ let capacityProviderParam = {
   managedScaling: {
     status: "ENABLED",
     targetCapacity: 60,
-    minimumScalingStepSize: 5,
-    maximumScalingStepSize: 100,
+    minimumScalingStepSize: 1,
+    maximumScalingStepSize: 1,
   },
   managedTerminationProtection: "ENABLED",
 };
