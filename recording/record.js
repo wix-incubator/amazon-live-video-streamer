@@ -28,10 +28,9 @@ const AUDIO_SAMPLERATE = 44100;
 const AUDIO_CHANNELS = 2;
 const DISPLAY = process.env.DISPLAY;
 
-// Maximum meeting duration is 4 hours.
-// We will forcefully kill recorder if it does not end after 4h 30min
+// We will forcefully kill recorder if it does not end after 25h
 const MAX_RECORDING_DURATION =
-  process.env.MAX_RECORDING_DURATION || 4.5 * 60 * 60;
+  process.env.MAX_RECORDING_DURATION || 25 * 60 * 60;
 
 let remainingSeconds = Number(MAX_RECORDING_DURATION);
 let recordingDurationInterval;
@@ -140,6 +139,5 @@ recordingDurationInterval = setInterval(() => {
     clearInterval(recordingDurationInterval);
     console.log("[recording process] task is running for too long - killing");
     process.kill(transcodeStreamToOutput.pid, "SIGTERM");
-    process.exit(1);
   }
 }, 1000);
