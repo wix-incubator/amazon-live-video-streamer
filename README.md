@@ -187,3 +187,33 @@ Amount of instances can further increase up to 1000.
 Should amount of recordings decrease, instances will be terminated to try and maintain no more than 60% instances occupied with tasks.
 
 Scale down would stop once there are 50 instances and no further instances would be terminated.
+
+## Bonus topics
+
+### How to recover video after Lambda crash
+
+There has been a case where lambda crashed and video did not appear in S3.
+
+To recover such video, one can try running the following command:
+
+```
+aws s3api list-multipart-uploads --bucket live-video-153051424915-us-east-1-recordings
+```
+
+This will list incomplete uploads. Search for missing key in the resulting JSON output and use its information for commands below.
+
+Gather multipart upload part information:
+```
+aws s3api list-parts --bucket live-video-153051424915-us-east-1-recordings --key '{key of missing video}' --upload-id {uploadId from result of previous command} > recovery.json
+```
+
+Once JSON is stored in file, leave only "Parts" key in it. Also ensure that each item inside "Parts" contains only "PartNumber" and "ETag" keys - delete all other keys. This can easily be done by using RegExp find-replace functionality of your favourite IDE.
+
+Once "recovery.json" is prepared, run the folling command:
+```
+aws s3api complete-multipart-upload --multipart-upload file://recovery.json --bucket live-video-153051424915-us-east-1-recordings --key '{key of missing video}' --upload-id {uploadId from result of previous command}
+```
+
+This command should connect parts of multipart-upload and create a missing S3 object.
+
+Make sure object is backed-up so that it would not be deleted soon after in case its availability deadline is approaching (business functionality).
