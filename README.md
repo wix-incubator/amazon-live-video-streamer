@@ -77,6 +77,8 @@ During initial deployment this script is known to sometimes fail due to timeout.
 
 ## Deployment of Code Updates
 
+When updating code it is recommended to update/increment echo line in "run.sh" file. This way you will be able to confirm that new version is used after deployment by checking CloudWatch logs.
+
 Code for Lambda function can be found under "lambda" folder.
 
 Code for recorder logic (which would go to docker image) can be found under "recording" folder.
@@ -98,7 +100,9 @@ node ./deploy.js -b live-recorder -s live-recorder -i {repository URI}:latest -r
 
 There have been cases when above command fails due to token expiration during update. After this happens stack goes into cleanup mode and repeated deploy command will fail until it is finished. It may take up to an hour in some cases. After cleanup is complete, please try deployment again - experience shows that it tends to succeed second time...
 
-Once above steps are completed, instances need to be updated because only new instances will contain updated image:
+Once above steps are completed, test recording, then open CloudWatch, go to "Log groups", go to "RecordingLogGroup", find logs of your test recorder and confirm that echo'ed version at the top of the logs matches your updated version.
+
+Should version not update automatically, instances may need to be updated manually to contain the new image:
 
 - Go to AWS console and into Elastic Container Service.
 - Select Recorder cluster, go to "Instances" tab and select option to drain all instances. This should wait for instances to complete tasks and prevent them from accepting new ones. Auto-scaling mechanism should launch new instances to compensate for drained ones. New instances will contain updated docker image.
