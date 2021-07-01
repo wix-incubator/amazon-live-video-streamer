@@ -89,7 +89,7 @@ Code for recorder logic (which would go to docker image) can be found under "rec
 
 When files are changed in the repository, in order to deploy changes following steps need to be performed:
 
-- Connect to AWS console and go to Cloud9 environment. Make sure you have access to it. If not - create a new environment and clone code to it (see installation section)
+- Connect to AWS console and go to Cloud9 environment. Make sure you have access to it. If not - create a new environment and clone code to it (see installation section). Also, feel free to create new environment if stuck at "Connecting...".
 - Build an updated docker image (you can find repository URI by going to AWS console and then going into Elastic Container Registry. There will be a list of registries with URIs in the table):
 
 ```
