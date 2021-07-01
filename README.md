@@ -77,7 +77,7 @@ During initial deployment this script is known to sometimes fail due to timeout.
 
 ## Deployment of Code Updates
 
-When updating code it is recommended to update/increment echo line in "run.sh" file. This way you will be able to confirm that new version is used after deployment by checking CloudWatch logs. Something like this:
+When updating code it is recommended to update/increment echo line in "run.sh" file under "recording". This way you will be able to confirm that new version is used after deployment by checking CloudWatch logs. Something like this:
 
 ```
 echo v14-wix
