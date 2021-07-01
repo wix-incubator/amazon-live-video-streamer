@@ -101,7 +101,7 @@ There have been cases when above command fails due to token expiration during up
 Once above steps are completed, instances need to be updated because only new instances will contain updated image:
 
 - Go to AWS console and into Elastic Container Service.
-- Select Recorder cluster, go to "Instances" tab ans select option to drain all instances. This should wait for instances to complete tasks and prevent them from accepting new ones. Auto-scaling mechanism should launch new instances to compensate for drained ones. New instances will contain updated docker image.
+- Select Recorder cluster, go to "Instances" tab and select option to drain all instances. This should wait for instances to complete tasks and prevent them from accepting new ones. Auto-scaling mechanism should launch new instances to compensate for drained ones. New instances will contain updated docker image.
 - Once instances are drained, they can be terminated by going to AWS console and into EC2 service. There you will find "instances" section. After selecting drained instances - there is an option above the table to terminate them.
 
 Be careful - do not terminate instances which do not belong to recording service. Also, do not terminate instances which are still running tasks.
