@@ -49,6 +49,20 @@ To build new docker image, run the following command:
 make ECR_REPO_URI={repository URI}
 ```
 
+Sometimes build fails due to lack of space on disk. Should this happen, you can increase disk size and repeat make operation. To increase size, run following commands:
+
+```
+# Check disk and partition name and use it in commands below
+df -h
+
+# Increase volume size (change path and partition number if needed based on df command above)
+sudo growpart /dev/nvme0n1 1
+sudo resize2fs /dev/nvme0n1p1
+
+# Retry make
+make ECR_REPO_URI={repository URI}
+```
+
 You can also find URI by going to AWS console and then going into Elastic Container Registry. There will be a list of registries with URIs in the table.
 
 Finally, you need to deploy docker image, configure cloud, S3, network, etc. This is done by using script:
