@@ -96,6 +96,8 @@ make ECR_REPO_URI={repository URI}
 node ./deploy.js -b live-recorder -s live-recorder -i {repository URI}:latest -r us-east-1
 ```
 
+There have been cases when above command fails due to token expiration during update. After this happens stack goes into cleanup mode and repeated deploy command will fail until it is finished. It may take up to an hour in some cases. After cleanup is complete, please try deployment again - experience shows that it tends to succeed second time...
+
 Once above steps are completed, instances need to be updated because only new instances will contain updated image:
 
 - Go to AWS console and into Elastic Container Service.
