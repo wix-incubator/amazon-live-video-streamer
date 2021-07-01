@@ -209,7 +209,7 @@ aws s3api list-parts --bucket live-video-153051424915-us-east-1-recordings --key
 
 Once JSON is stored in file, leave only "Parts" key in it. Also ensure that each item inside "Parts" contains only "PartNumber" and "ETag" keys - delete all other keys. This can easily be done by using RegExp find-replace functionality of your favourite IDE.
 
-Once "recovery.json" is prepared, run the folling command:
+Once "recovery.json" is prepared, run the following command:
 ```
 aws s3api complete-multipart-upload --multipart-upload file://recovery.json --bucket live-video-153051424915-us-east-1-recordings --key '{key of missing video}' --upload-id {uploadId from result of previous command}
 ```
