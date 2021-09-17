@@ -1,3 +1,5 @@
+forked from https://github.com/wix-incubator/amazon-live-video-recorder
+
 # Live Video Recorder
 
 Recorder is based on Amazon Chime recorder demo project:
