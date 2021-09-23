@@ -121,6 +121,9 @@ ensureEC2ImageId();
 
 spawnOrFail("sam", [
   "package",
+  "--s3-bucket",
+  // https://github.com/aws/aws-sam-cli/issues/2450#issuecomment-752669104
+  'placeholder',
   "--template-file",
   "templates/StreamingCloudformationTemplateNAT.yaml",
   "--output-template-file",
