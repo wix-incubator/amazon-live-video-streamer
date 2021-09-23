@@ -76,6 +76,10 @@ Parameters:
     Type: String
     Default: 10.192.11.0/24
 Resources:
+#  StreamingArtifactsUploadBucket:
+#    Type: AWS::S3::Bucket
+#    Properties:
+#        AccessControl: BucketOwnerFullControl
 #  StreamingLambdaExecutionRole:
 #    Type: AWS::IAM::Role
 #    Properties:
