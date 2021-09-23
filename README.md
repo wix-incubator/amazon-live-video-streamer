@@ -102,7 +102,7 @@ make ECR_REPO_URI={repository URI}
 - Deploy updated image and new Lambda:
 
 ```
-node ./deploy.js -b live-streamer -s live-streamer -i {repository URI}:latest -r us-east-1
+node ./deploy.js -s live-streamer -i {repository URI}:latest -r us-east-1
 ```
 
 There have been cases when above command fails due to token expiration during update. After this happens stack goes into cleanup mode and repeated deploy command will fail until it is finished. It may take up to an hour in some cases. After cleanup is complete, please try deployment again - experience shows that it tends to succeed second time...
