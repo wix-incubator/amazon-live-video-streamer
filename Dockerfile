@@ -16,6 +16,6 @@ COPY /streaming /streaming
 WORKDIR /streaming
 RUN /usr/bin/npm install && \
 	chmod +x /streaming/run.sh && \
-	chmod +x /streaming/livestream.js
+	chmod +x /streaming/stream.js
 
 ENTRYPOINT ["/streaming/run.sh"]
