@@ -2,10 +2,11 @@ In order to be suitable for usage by Wix, library has been modified:
   * Naming was changed to reflect new purpose of the project (wix-related, no longer demo)
   * README.md re-written
   * Code formatting
-  * Changed S3Uploader to S3Utils to make it more generic and add additional functionality
   * Removed/changed code comments which are no longer suitable after code changes
   * Changed URL query param names to have them more generic
-  * Output file name/path was made configurable, path was simplified, bucket renamed
   * Delay before recording starts made configurable
   * Moved src to lambda and added tests
   * Refactored lambda code
+  * Removed S3 related code
+  * Re-purposed recorder into a streamer
+  

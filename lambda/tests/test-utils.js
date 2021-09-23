@@ -1,17 +1,15 @@
-const TARGET_URL = "https://google.com";
-const RECORDING_NAME = "RECORDING_NAME";
-const RECORDING_TASK_ARN = "RECORDING_TASK_ARN";
-const DOWNLOAD_URL = "DOWNLOAD_URL";
+const TARGET_URL = "https://127.0.0.1/somepage";
+const RTMP_SERVER_URL = "rtmp://127.0.0.1/livestream";
+const STREAM_KEY = "very-secret";
+const STREAMING_TASK_ARN = "STREAMING_TASK_ARN";
 
 const mockEnvironment = () => {
   process.env.ecsClusterArn = "ECS_CLUSTER_ARN";
   process.env.ecsTaskDefinitionArn = "ECS_TASK_DEFINITION_ARN";
   process.env.ecsContainerName = "ECS_CONTAINER_NAME";
-  process.env.recordingArtifactsBucket = "RECORDING_ARTIFACTS_BUCKET";
 
   // Copy variables due to constraints enforced by Jest
-  const RECORDING_TASK_ARN_MOCK = RECORDING_TASK_ARN;
-  const DOWNLOAD_URL_MOCK = DOWNLOAD_URL;
+  const STREAMING_TASK_ARN_MOCK = STREAMING_TASK_ARN;
 
   jest.mock("aws-sdk", () => {
     const ecsMock = {
@@ -19,7 +17,7 @@ const mockEnvironment = () => {
         cb(null, {
           tasks: [
             {
-              taskArn: RECORDING_TASK_ARN_MOCK,
+              taskArn: STREAMING_TASK_ARN_MOCK,
             },
           ],
         });
@@ -29,31 +27,12 @@ const mockEnvironment = () => {
       }),
     };
 
-    const s3Mock = {
-      init: jest.fn(),
-      getSignedUrl: jest.fn((type, params, cb) => {
-        cb(null, DOWNLOAD_URL_MOCK);
-      }),
-      deleteObject: jest.fn((cb) => {
-        cb(null);
-      }),
-    };
-
     return {
       ecsMock,
-      s3Mock,
       ECS: class {
         constructor() {
           return ecsMock;
         }
-      },
-      S3: class {
-        constructor(...args) {
-          s3Mock.init(...args);
-        }
-
-        getSignedUrl = s3Mock.getSignedUrl;
-        deleteObject = s3Mock.deleteObject;
       },
     };
   });
@@ -74,7 +53,7 @@ const getTaskDefinition = () => ({
       {
         environment: [
           {
-            name: "RECORDER_DELAY",
+            name: "STREAMER_DELAY",
             value: "7",
           },
           {
@@ -82,12 +61,12 @@ const getTaskDefinition = () => ({
             value: TARGET_URL,
           },
           {
-            name: "OUTPUT_FILE_NAME",
-            value: RECORDING_NAME,
+            name: "RTMP_SERVER_URL",
+            value: RTMP_SERVER_URL,
           },
           {
-            name: "RECORDING_ARTIFACTS_BUCKET",
-            value: process.env.recordingArtifactsBucket,
+            name: "STREAM_KEY",
+            value: STREAM_KEY,
           },
         ],
         name: process.env.ecsContainerName,
@@ -134,9 +113,9 @@ const disableConsoleLog = () => {
 
 module.exports = {
   TARGET_URL,
-  RECORDING_NAME,
-  RECORDING_TASK_ARN,
-  DOWNLOAD_URL,
+  RTMP_SERVER_URL,
+  STREAM_KEY,
+  STREAMING_TASK_ARN,
   mockEnvironment,
   context,
   eventCallback,

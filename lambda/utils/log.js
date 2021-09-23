@@ -21,7 +21,7 @@ const clearNamespace = (level) => {
 
 const log = (...messages) => {
   console.log(
-    `[Recorder${currentNamespace ? `/${currentNamespace}` : ""}] `,
+    `[Streamer${currentNamespace ? `/${currentNamespace}` : ""}] `,
     ...messages
   );
 };

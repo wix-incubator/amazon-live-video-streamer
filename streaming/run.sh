@@ -7,7 +7,7 @@ echo v14-wix
 
 set -xeo pipefail
 
-: "${RECORDER_DELAY:=7}"
+: "${STREAMER_DELAY:=7}"
 : "${UNBLOCK_CLICK_X:=1}"
 : "${UNBLOCK_CLICK_Y:=100}"
 BROWSER_URL="${TARGET_URL}"
@@ -16,7 +16,6 @@ SCREEN_HEIGHT=${RECORDING_SCREEN_HEIGHT:-'720'}
 SCREEN_RESOLUTION=${SCREEN_WIDTH}x${SCREEN_HEIGHT}
 COLOR_DEPTH=24
 X_SERVER_NUM=1
-S3_BUCKET_NAME=${RECORDING_ARTIFACTS_BUCKET}
 
 # Start PulseAudio server so Firefox will have somewhere to which to send audio
 pulseaudio -D --exit-idle-time=-1
@@ -81,7 +80,7 @@ while true; do
   sleep 1
 done &
 
-sleep $RECORDER_DELAY # Skip part of long loading procedure...
+sleep $STREAMER_DELAY # Skip part of long loading procedure...
 
-exec node /recording/record.js ${S3_BUCKET_NAME} ${SCREEN_WIDTH} ${SCREEN_HEIGHT}
+exec node /streaming/stream.js ${SCREEN_WIDTH} ${SCREEN_HEIGHT}
 

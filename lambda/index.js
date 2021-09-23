@@ -7,13 +7,10 @@ const VERSION = 13;
 
 console.log(`Version: ${VERSION}-wix`);
 
-const { S3Utils } = require("./utils/s3");
 const { Params } = require("./utils/params");
 const { respondFactory } = require("./utils/response");
-const { startRecording, stopRecording } = require("./utils/recording");
+const { startStreaming, stopStreaming } = require("./utils/streaming");
 const { setNamespace, log } = require("./utils/log");
-
-const recordingArtifactsBucket = process.env.recordingArtifactsBucket;
 
 exports.handler = function (event, context, callback) {
   setNamespace("Handler");
@@ -28,10 +25,8 @@ exports.handler = function (event, context, callback) {
   log("Handling action: ", action);
 
   const parametersConfig = {
-    start: ["targetURL", "recordingName"],
+    start: ["targetUrl", "rtmpServerUrl", "streamKey"],
     stop: ["taskId"],
-    download: ["recordingName"],
-    delete: ["recordingName"],
   };
 
   log("Required parameters configuration: ", parametersConfig);
@@ -43,79 +38,16 @@ exports.handler = function (event, context, callback) {
       case "start":
         setNamespace(action);
 
-        return startRecording(
+        return startStreaming(
           respond,
-          params.get("targetURL"),
-          params.get("recordingName")
+          params.get("targetUrl"),
+          params.get("rtmpServerUrl"),
+          params.get("streamKey"),
         );
       case "stop":
         setNamespace(action);
 
-        return stopRecording(respond, params.get("taskId"));
-      case "download":
-        setNamespace(action);
-
-        new S3Utils(
-          recordingArtifactsBucket,
-          `${params.get("recordingName")}.mp4`
-        )
-          .getUrl()
-          .then((url) => {
-            respond({
-              statusCode: 200,
-              body: JSON.stringify(
-                {
-                  url,
-                },
-                null,
-                " "
-              ),
-            });
-          })
-          .catch((e) => {
-            respond({
-              statusCode: e.statusCode,
-              headers: {},
-              body: JSON.stringify(
-                {
-                  error: e,
-                },
-                null,
-                " "
-              ),
-            });
-          });
-
-        break;
-
-      case "delete":
-        setNamespace(action);
-
-        new S3Utils(
-          recordingArtifactsBucket,
-          `${params.get("recordingName")}.mp4`
-        )
-          .remove()
-          .then(() => {
-            respond({
-              statusCode: 200,
-              body: JSON.stringify(
-                {
-                  message: `OK`,
-                },
-                null,
-                " "
-              ),
-            });
-          })
-          .catch((e) => {
-            respond({
-              statusCode: e.statusCode,
-              body: JSON.stringify({ error: e }, null, " "),
-            });
-          });
-
-        break;
+        return stopStreaming(respond, params.get("taskId"));
 
       default:
         respond({
@@ -123,7 +55,7 @@ exports.handler = function (event, context, callback) {
           body: JSON.stringify({
             error: {
               message:
-                "Invalid parameter: action. Valid values 'start', 'stop', 'download', 'delete'",
+                "Invalid parameter: action. Valid values 'start', 'stop'",
             },
           }),
         });

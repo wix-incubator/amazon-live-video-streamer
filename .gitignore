@@ -1,6 +1,6 @@
 .DS_Store
 .idea
-recording.log
+streaming.log
 container.env
-/recording/node_modules/
+/streaming/node_modules/
 /lambda/node_modules/

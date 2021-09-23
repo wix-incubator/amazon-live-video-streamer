@@ -6,9 +6,8 @@ const { log } = require("./log");
 const ecsClusterArn = process.env.ecsClusterArn;
 const ecsTaskDefinitionArn = process.env.ecsTaskDefinitionArn;
 const ecsContainerName = process.env.ecsContainerName;
-const recordingArtifactsBucket = process.env.recordingArtifactsBucket;
 
-const startRecording = (respond, targetURL, recordingName) => {
+const startStreaming = (respond, targetUrl, rtmpServerUrl, streamKey) => {
   let ecsRunTaskParams = {
     cluster: ecsClusterArn,
     launchType: "EC2",
@@ -18,20 +17,20 @@ const startRecording = (respond, targetURL, recordingName) => {
         {
           environment: [
             {
-              name: "RECORDER_DELAY",
+              name: "STREAMER_DELAY",
               value: "7",
             },
             {
               name: "TARGET_URL",
-              value: targetURL,
+              value: targetUrl,
             },
             {
-              name: "OUTPUT_FILE_NAME",
-              value: recordingName,
+              name: "RTMP_SERVER_URL",
+              value: rtmpServerUrl,
             },
             {
-              name: "RECORDING_ARTIFACTS_BUCKET",
-              value: recordingArtifactsBucket,
+              name: "STREAM_KEY",
+              value: streamKey,
             },
           ],
           name: ecsContainerName,
@@ -64,7 +63,7 @@ const startRecording = (respond, targetURL, recordingName) => {
         respond({
           statusCode: 500,
           body: JSON.stringify(
-            { error: { message: "Failed to start recording task!" } },
+            { error: { message: "Failed to start streaming task!" } },
             null,
             1
           ),
@@ -74,7 +73,7 @@ const startRecording = (respond, targetURL, recordingName) => {
   });
 };
 
-const stopRecording = (respond, taskId) => {
+const stopStreaming = (respond, taskId) => {
   let ecsStopTaskParam = {
     cluster: ecsClusterArn,
     task: taskId,
@@ -95,4 +94,4 @@ const stopRecording = (respond, taskId) => {
   });
 };
 
-module.exports = { startRecording, stopRecording };
+module.exports = { startStreaming, stopStreaming };

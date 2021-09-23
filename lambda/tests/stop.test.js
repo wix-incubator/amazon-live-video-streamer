@@ -1,5 +1,5 @@
 const {
-  RECORDING_TASK_ARN,
+  STREAMING_TASK_ARN,
   mockEnvironment,
   context,
   callHandlerWithBodyArguments,
@@ -10,7 +10,7 @@ const {
 mockEnvironment();
 const { ecsMock } = require("aws-sdk");
 
-describe("Recorder Lambda", () => {
+describe("Streamer Lambda", () => {
   describe("stop", () => {
     beforeAll(() => {
       disableConsoleLog();
@@ -23,7 +23,7 @@ describe("Recorder Lambda", () => {
     it("works using query parameters", () => {
       callHandlerWithQuery({
         action: "stop",
-        taskId: RECORDING_TASK_ARN,
+        taskId: STREAMING_TASK_ARN,
       });
 
       expect(ecsMock.stopTask).toHaveBeenCalledTimes(1);
@@ -31,7 +31,7 @@ describe("Recorder Lambda", () => {
       expect(ecsMock.stopTask).toHaveBeenCalledWith(
         {
           cluster: process.env.ecsClusterArn,
-          task: RECORDING_TASK_ARN,
+          task: STREAMING_TASK_ARN,
         },
         expect.anything()
       );
@@ -48,7 +48,7 @@ describe("Recorder Lambda", () => {
     it("works using post parameters", () => {
       callHandlerWithBodyArguments({
         action: "stop",
-        taskId: RECORDING_TASK_ARN,
+        taskId: STREAMING_TASK_ARN,
       });
 
       expect(ecsMock.stopTask).toHaveBeenCalledTimes(1);
@@ -56,7 +56,7 @@ describe("Recorder Lambda", () => {
       expect(ecsMock.stopTask).toHaveBeenCalledWith(
         {
           cluster: process.env.ecsClusterArn,
-          task: RECORDING_TASK_ARN,
+          task: STREAMING_TASK_ARN,
         },
         expect.anything()
       );
@@ -73,7 +73,7 @@ describe("Recorder Lambda", () => {
     it("works using mixed case action", () => {
       callHandlerWithQuery({
         action: "StoP",
-        taskId: RECORDING_TASK_ARN,
+        taskId: STREAMING_TASK_ARN,
       });
 
       expect(ecsMock.stopTask).toHaveBeenCalledTimes(1);
@@ -81,7 +81,7 @@ describe("Recorder Lambda", () => {
       expect(ecsMock.stopTask).toHaveBeenCalledWith(
         {
           cluster: process.env.ecsClusterArn,
-          task: RECORDING_TASK_ARN,
+          task: STREAMING_TASK_ARN,
         },
         expect.anything()
       );
@@ -106,7 +106,7 @@ describe("Recorder Lambda", () => {
 
       callHandlerWithQuery({
         action: "stop",
-        taskId: RECORDING_TASK_ARN,
+        taskId: STREAMING_TASK_ARN,
       });
 
       expect(ecsMock.stopTask).toHaveBeenCalledTimes(1);
@@ -114,7 +114,7 @@ describe("Recorder Lambda", () => {
       expect(ecsMock.stopTask).toHaveBeenCalledWith(
         {
           cluster: process.env.ecsClusterArn,
-          task: RECORDING_TASK_ARN,
+          task: STREAMING_TASK_ARN,
         },
         expect.anything()
       );

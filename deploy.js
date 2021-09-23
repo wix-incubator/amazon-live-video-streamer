@@ -8,45 +8,17 @@ const fs = require("fs");
 // Parameters
 let region = "us-east-1";
 let imageId = ``;
-let bucket = ``;
 let stack = ``;
 let ecrDockerImageArn = ``;
 
 function usage() {
   console.log(
-    `Usage: deploy.sh [-r region] [-b bucket] [-s stack] [-i docker-image]`
+    `Usage: deploy.sh [-r region] [-s stack] [-i docker-image]`
   );
   console.log(`  -r, --region       Target region, default '${region}'`);
-  console.log(`  -b, --s3-bucket    S3 bucket for deployment, required`);
   console.log(`  -s, --stack-name   CloudFormation stack name, required`);
   console.log(`  -i, --image-arn    Docker image store in ECR, required`);
   console.log(`  -h, --help         Show help and exit`);
-}
-
-function ensureBucket() {
-  const s3Api = spawnSync("aws", [
-    "s3api",
-    "head-bucket",
-    "--bucket",
-    `${bucket}`,
-    "--region",
-    `${region}`,
-  ]);
-  if (s3Api.status !== 0) {
-    console.log(`Creating S3 bucket ${bucket}`);
-    const s3 = spawnSync("aws", [
-      "s3",
-      "mb",
-      `s3://${bucket}`,
-      "--region",
-      `${region}`,
-    ]);
-    if (s3.status !== 0) {
-      console.log(`Failed to create bucket: ${JSON.stringify(s3)}`);
-      console.log((s3.stderr || s3.stdout).toString());
-      process.exit(s3.status);
-    }
-  }
 }
 
 function ensureEC2ImageId() {
@@ -92,10 +64,6 @@ function parseArgs() {
       case "--region":
         region = getArgOrExit(++i, args);
         break;
-      case "-b":
-      case "--s3-bucket":
-        bucket = getArgOrExit(++i, args);
-        break;
       case "-s":
       case "--stack-name":
         stack = getArgOrExit(++i, args);
@@ -111,7 +79,7 @@ function parseArgs() {
     }
     ++i;
   }
-  if (!stack.trim() || !bucket.trim() || !ecrDockerImageArn.trim()) {
+  if (!stack.trim() || !ecrDockerImageArn.trim()) {
     console.log("Missing required parameters");
     usage();
     process.exit(1);
@@ -148,23 +116,20 @@ if (!fs.existsSync("build")) {
   fs.mkdirSync("build");
 }
 
-console.log(`Using region ${region}, bucket ${bucket}, stack ${stack}`);
+console.log(`Using region ${region}, stack ${stack}`);
 ensureEC2ImageId();
-ensureBucket();
 
 spawnOrFail("sam", [
   "package",
-  "--s3-bucket",
-  `${bucket}`,
   "--template-file",
-  "templates/RecordingCloudformationTemplateNAT.yaml",
+  "templates/StreamingCloudformationTemplateNAT.yaml",
   "--output-template-file",
   "build/packaged.yaml",
   "--region",
   `${region}`,
 ]);
 
-console.log("Deploying recording application");
+console.log("Deploying streaming application");
 const output = spawnOrFail("sam", [
   "deploy",
   "--template-file",
@@ -193,7 +158,7 @@ const invokeUrl = spawnOrFail("aws", [
   "--region",
   `${region}`,
 ]);
-console.log(`Recording API Gateway invoke URL: ${invokeUrl}`);
+console.log(`Streaming API Gateway invoke URL: ${invokeUrl}`);
 
 const ecsClusterName = spawnOrFail("aws", [
   "cloudformation",

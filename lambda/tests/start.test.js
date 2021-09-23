@@ -1,7 +1,8 @@
 const {
   TARGET_URL,
-  RECORDING_NAME,
-  RECORDING_TASK_ARN,
+  RTMP_SERVER_URL,
+  STREAM_KEY,
+  STREAMING_TASK_ARN,
   mockEnvironment,
   context,
   getTaskDefinition,
@@ -13,7 +14,7 @@ const {
 mockEnvironment();
 const { ecsMock } = require("aws-sdk");
 
-describe("Recorder Lambda", () => {
+describe("Streamer Lambda", () => {
   describe("start", () => {
     beforeAll(() => {
       disableConsoleLog();
@@ -26,8 +27,9 @@ describe("Recorder Lambda", () => {
     it("works using query parameters", () => {
       callHandlerWithQuery({
         action: "start",
-        targetURL: TARGET_URL,
-        recordingName: RECORDING_NAME,
+        targetUrl: TARGET_URL,
+        rtmpServerUrl: RTMP_SERVER_URL,
+        streamKey: STREAM_KEY,
       });
 
       expect(ecsMock.runTask).toHaveBeenCalledTimes(1);
@@ -42,7 +44,7 @@ describe("Recorder Lambda", () => {
         expect.objectContaining({
           body: JSON.stringify(
             {
-              taskArn: RECORDING_TASK_ARN,
+              taskArn: STREAMING_TASK_ARN,
             },
             null,
             1
@@ -55,8 +57,9 @@ describe("Recorder Lambda", () => {
     it("works using post parameters", () => {
       callHandlerWithBodyArguments({
         action: "start",
-        targetURL: TARGET_URL,
-        recordingName: RECORDING_NAME,
+        targetUrl: TARGET_URL,
+        rtmpServerUrl: RTMP_SERVER_URL,
+        streamKey: STREAM_KEY,
       });
 
       expect(ecsMock.runTask).toHaveBeenCalledTimes(1);
@@ -71,7 +74,7 @@ describe("Recorder Lambda", () => {
         expect.objectContaining({
           body: JSON.stringify(
             {
-              taskArn: RECORDING_TASK_ARN,
+              taskArn: STREAMING_TASK_ARN,
             },
             null,
             1
@@ -84,15 +87,16 @@ describe("Recorder Lambda", () => {
     it("works using mixed case action", () => {
       callHandlerWithQuery({
         action: "StarT",
-        targetURL: TARGET_URL,
-        recordingName: RECORDING_NAME,
+        targetUrl: TARGET_URL,
+        rtmpServerUrl: RTMP_SERVER_URL,
+        streamKey: STREAM_KEY,
       });
 
       expect(context.succeed).toHaveBeenCalledWith(
         expect.objectContaining({
           body: JSON.stringify(
             {
-              taskArn: RECORDING_TASK_ARN,
+              taskArn: STREAMING_TASK_ARN,
             },
             null,
             1
@@ -111,8 +115,9 @@ describe("Recorder Lambda", () => {
 
       callHandlerWithQuery({
         action: "start",
-        targetURL: TARGET_URL,
-        recordingName: RECORDING_NAME,
+        targetUrl: TARGET_URL,
+        rtmpServerUrl: RTMP_SERVER_URL,
+        streamKey: STREAM_KEY,
       });
 
       expect(ecsMock.runTask).toHaveBeenCalledTimes(1);
@@ -128,7 +133,7 @@ describe("Recorder Lambda", () => {
           body: JSON.stringify(
             {
               error: {
-                message: "Failed to start recording task!",
+                message: "Failed to start streaming task!",
               },
             },
             null,
@@ -152,8 +157,9 @@ describe("Recorder Lambda", () => {
 
       callHandlerWithQuery({
         action: "start",
-        targetURL: TARGET_URL,
-        recordingName: RECORDING_NAME,
+        targetUrl: TARGET_URL,
+        rtmpServerUrl: RTMP_SERVER_URL,
+        streamKey: STREAM_KEY,
       });
 
       expect(ecsMock.runTask).toHaveBeenCalledTimes(1);
@@ -180,10 +186,11 @@ describe("Recorder Lambda", () => {
       ecsMock.runTask = defaultRunTask;
     });
 
-    it("returns error if targetURL is not provided", () => {
+    it("returns error if targetUrl is not provided", () => {
       callHandlerWithQuery({
         action: "start",
-        recordingName: RECORDING_NAME,
+        rtmpServerUrl: RTMP_SERVER_URL,
+        streamKey: STREAM_KEY,
       });
 
       expect(ecsMock.runTask).not.toHaveBeenCalled();
@@ -195,7 +202,7 @@ describe("Recorder Lambda", () => {
           body: JSON.stringify(
             {
               error: {
-                message: "Missing parameter: targetURL",
+                message: "Missing parameter: targetUrl",
               },
             },
             null,
@@ -206,10 +213,11 @@ describe("Recorder Lambda", () => {
       );
     });
 
-    it("returns error if recordingName is not provided", () => {
+    it("returns error if rtmpServerUrl is not provided", () => {
       callHandlerWithQuery({
         action: "start",
-        targetURL: TARGET_URL,
+        targetUrl: TARGET_URL,
+        streamKey: STREAM_KEY,
       });
 
       expect(ecsMock.runTask).not.toHaveBeenCalled();
@@ -221,7 +229,34 @@ describe("Recorder Lambda", () => {
           body: JSON.stringify(
             {
               error: {
-                message: "Missing parameter: recordingName",
+                message: "Missing parameter: rtmpServerUrl",
+              },
+            },
+            null,
+            1
+          ),
+          statusCode: 400,
+        })
+      );
+    });
+
+    it("returns error if streamKey is not provided", () => {
+      callHandlerWithQuery({
+        action: "start",
+        targetUrl: TARGET_URL,
+        rtmpServerUrl: RTMP_SERVER_URL,
+      });
+
+      expect(ecsMock.runTask).not.toHaveBeenCalled();
+
+      expect(context.succeed).toHaveBeenCalledTimes(1);
+
+      expect(context.succeed).toHaveBeenCalledWith(
+        expect.objectContaining({
+          body: JSON.stringify(
+            {
+              error: {
+                message: "Missing parameter: streamKey",
               },
             },
             null,

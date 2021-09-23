@@ -7,7 +7,7 @@ const {
 
 mockEnvironment();
 
-describe("Recorder Lambda", () => {
+describe("Streamer Lambda", () => {
   describe("no action", () => {
     beforeAll(() => {
       disableConsoleLog();
@@ -24,7 +24,7 @@ describe("Recorder Lambda", () => {
         expect.objectContaining({
           statusCode: 400,
           body:
-            "{\"error\":{\"message\":\"Invalid parameter: action. Valid values 'start', 'stop', 'download', 'delete'\"}}",
+            "{\"error\":{\"message\":\"Invalid parameter: action. Valid values 'start', 'stop'\"}}",
         })
       );
     });

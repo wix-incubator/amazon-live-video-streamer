@@ -2,22 +2,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 const { spawn } = require("child_process");
-const { S3Utils } = require("./utils/s3");
-
-const OUTPUT_FILE_NAME =
-  process.env.OUTPUT_FILE_NAME || "Not present in environment";
-console.log(`[recording process] OUTPUT_FILE_NAME: ${OUTPUT_FILE_NAME}`);
 
 const TARGET_URL = process.env.TARGET_URL || "Not present in environment";
-console.log(`[recording process] TARGET_URL: ${TARGET_URL}`);
+console.log(`[streaming process] TARGET_URL: ${TARGET_URL}`);
+
+const RTMP_SERVER_URL = process.env.RTMP_SERVER_URL || "Not present in environment";
+console.log(`[streaming process] RTMP_SERVER_URL: ${RTMP_SERVER_URL}`);
+
+const STREAM_KEY = process.env.STREAM_KEY || "Not present in environment";
+console.log(`[streaming process] STREAM_KEY: ${STREAM_KEY}`);
 
 const args = process.argv.slice(2);
-const BUCKET_NAME = args[0];
-console.log(`[recording process] BUCKET_NAME: ${BUCKET_NAME}`);
-const BROWSER_SCREEN_WIDTH = args[1];
-const BROWSER_SCREEN_HEIGHT = args[2];
+const BROWSER_SCREEN_WIDTH = args[0];
+const BROWSER_SCREEN_HEIGHT = args[1];
 console.log(
-  `[recording process] BROWSER_SCREEN_WIDTH: ${BROWSER_SCREEN_WIDTH}, BROWSER_SCREEN_HEIGHT: ${BROWSER_SCREEN_HEIGHT}`
+  `[streaming process] BROWSER_SCREEN_WIDTH: ${BROWSER_SCREEN_WIDTH}, BROWSER_SCREEN_HEIGHT: ${BROWSER_SCREEN_HEIGHT}`
 );
 
 const VIDEO_BITRATE = 3000;
@@ -28,12 +27,12 @@ const AUDIO_SAMPLERATE = 44100;
 const AUDIO_CHANNELS = 2;
 const DISPLAY = process.env.DISPLAY;
 
-// We will forcefully kill recorder if it does not end after 25h
-const MAX_RECORDING_DURATION =
-  process.env.MAX_RECORDING_DURATION || 25 * 60 * 60;
+// We will forcefully kill streamer if it does not end after 25h
+const MAX_STREAMING_DURATION =
+  process.env.MAX_STREAMING_DURATION || 25 * 60 * 60;
 
-let remainingSeconds = Number(MAX_RECORDING_DURATION);
-let recordingDurationInterval;
+let remainingSeconds = Number(MAX_STREAMING_DURATION);
+let streamingDurationInterval;
 
 const transcodeStreamToOutput = spawn("ffmpeg", [
   "-hide_banner",
@@ -94,10 +93,10 @@ const transcodeStreamToOutput = spawn("ffmpeg", [
   // adjust fragmentation to prevent seeking(resolve issue: muxer does not support non seekable output)
   "-movflags",
   "frag_keyframe+empty_moov",
-  // set output format to mp4 and output file to stdout
+  "-flvflags",
+  "no_duration_filesize",
   "-f",
-  "mp4",
-  "-",
+  `flv ${RTMP_SERVER_URL}/${STREAM_KEY}`,
 ]);
 
 transcodeStreamToOutput.stderr.on("data", (data) => {
@@ -106,38 +105,35 @@ transcodeStreamToOutput.stderr.on("data", (data) => {
   );
 });
 
-const fileName = `${OUTPUT_FILE_NAME}.mp4`;
-new S3Utils(BUCKET_NAME, fileName).uploadStream(transcodeStreamToOutput.stdout);
-
 // event handler for docker stop, not exit until upload completes
 process.on("SIGTERM", (code, signal) => {
   console.log(
-    `[recording process] exited with code ${code} and signal ${signal}(SIGTERM)`
+    `[streaming process] exited with code ${code} and signal ${signal}(SIGTERM)`
   );
-  clearInterval(recordingDurationInterval);
+  clearInterval(streamingDurationInterval);
   process.kill(transcodeStreamToOutput.pid, "SIGTERM");
 });
 
 // debug use - event handler for ctrl + c
 process.on("SIGINT", (code, signal) => {
   console.log(
-    `[recording process] exited with code ${code} and signal ${signal}(SIGINT)`
+    `[streaming process] exited with code ${code} and signal ${signal}(SIGINT)`
   );
-  clearInterval(recordingDurationInterval);
+  clearInterval(streamingDurationInterval);
   process.kill("SIGTERM");
 });
 
 process.on("exit", function (code) {
-  clearInterval(recordingDurationInterval);
-  console.log("[recording process] exit code", code);
+  clearInterval(streamingDurationInterval);
+  console.log("[streaming process] exit code", code);
 });
 
-recordingDurationInterval = setInterval(() => {
+streamingDurationInterval = setInterval(() => {
   remainingSeconds--;
 
   if (remainingSeconds < 0) {
-    clearInterval(recordingDurationInterval);
-    console.log("[recording process] task is running for too long - killing");
+    clearInterval(streamingDurationInterval);
+    console.log("[streaming process] task is running for too long - killing");
     process.kill(transcodeStreamToOutput.pid, "SIGTERM");
   }
 }, 1000);

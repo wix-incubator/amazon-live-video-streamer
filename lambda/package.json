@@ -1,5 +1,5 @@
 {
-  "name": "recording-lambda",
+  "name": "streaming-lambda",
   "version": "1.0.0",
   "scripts": {
     "test": "jest"
