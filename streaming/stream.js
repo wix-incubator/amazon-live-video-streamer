@@ -96,7 +96,8 @@ const transcodeStreamToOutput = spawn("ffmpeg", [
   "-flvflags",
   "no_duration_filesize",
   "-f",
-  `flv ${RTMP_SERVER_URL}/${STREAM_KEY}`,
+  "flv",
+  `${RTMP_SERVER_URL}/${STREAM_KEY}`,
 ]);
 
 transcodeStreamToOutput.stderr.on("data", (data) => {
