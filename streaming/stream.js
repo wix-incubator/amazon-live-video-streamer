@@ -19,7 +19,6 @@ console.log(
   `[streaming process] BROWSER_SCREEN_WIDTH: ${BROWSER_SCREEN_WIDTH}, BROWSER_SCREEN_HEIGHT: ${BROWSER_SCREEN_HEIGHT}`
 );
 
-const VIDEO_BITRATE = 3000;
 const VIDEO_FRAMERATE = 30;
 const VIDEO_GOP = VIDEO_FRAMERATE * 2;
 const AUDIO_BITRATE = "160k";
@@ -34,7 +33,7 @@ const MAX_STREAMING_DURATION =
 let remainingSeconds = Number(MAX_STREAMING_DURATION);
 let streamingDurationInterval;
 
-const transcodeStreamToOutput = spawn("ffmpeg", [
+const ffmpegArgs = [
   "-hide_banner",
   "-loglevel",
   "error",
@@ -49,6 +48,8 @@ const transcodeStreamToOutput = spawn("ffmpeg", [
   // hides the mouse cursor from the resulting video
   "-draw_mouse",
   "0",
+  "-thread_queue_size",
+  "1024",
   // grab the x11 display as video input
   "-f",
   "x11grab",
@@ -56,26 +57,36 @@ const transcodeStreamToOutput = spawn("ffmpeg", [
   `${DISPLAY}`,
   // grab pulse as audio input
   "-f",
+  "alsa",
+  "-i",
   "pulse",
   "-ac",
   "2",
-  "-i",
-  "default",
   // codec video with libx264
   "-c:v",
   "libx264",
   "-pix_fmt",
   "yuv420p",
+  "-level:v",
+  "4.2",
   "-profile:v",
   "main",
   "-preset",
-  "veryfast",
+  "ultrafast",
+  "-tune",
+  "zerolatency",
   "-x264opts",
   "nal-hrd=cbr:no-scenecut",
+  "-x264-params",
+  "nal-hrd=cbr:no-scenecut",
   "-minrate",
-  `${VIDEO_BITRATE}`,
+  "800k",
   "-maxrate",
-  `${VIDEO_BITRATE}`,
+  "2500k",
+  "-bufsize",
+  "8000k",
+  "-b:v",
+  "1000k",
   "-g",
   `${VIDEO_GOP}`,
   // apply a fixed delay to the audio stream in order to synchronize it with the video stream
@@ -90,6 +101,8 @@ const transcodeStreamToOutput = spawn("ffmpeg", [
   `${AUDIO_CHANNELS}`,
   "-ar",
   `${AUDIO_SAMPLERATE}`,
+  "-threads",
+  "8",
   // adjust fragmentation to prevent seeking(resolve issue: muxer does not support non seekable output)
   "-movflags",
   "frag_keyframe+empty_moov",
@@ -98,7 +111,11 @@ const transcodeStreamToOutput = spawn("ffmpeg", [
   "-f",
   "flv",
   `${RTMP_SERVER_URL}/${STREAM_KEY}`,
-]);
+]
+console.log(
+  `[streaming process] ffmpeg ${ffmpegArgs.join(' ')}`
+);
+const transcodeStreamToOutput = spawn("ffmpeg", ffmpegArgs);
 
 transcodeStreamToOutput.stderr.on("data", (data) => {
   console.log(

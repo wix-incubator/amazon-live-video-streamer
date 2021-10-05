@@ -17,6 +17,24 @@ Additional information can be found in internal Slack channel for live-video.
 
 ---
 
+## Testing container locally
+
+Build docker image locally:
+```
+docker build -t live-streamer .
+```
+
+Run it:
+```
+docker run \
+  -p 127.0.0.1:1935:1935/tcp \
+  --env "STREAMER_DELAY=7" \
+  --env "TARGET_URL={website}}" \
+  --env "RTMP_SERVER_URL={streaming destination}" \
+  --env "STREAM_KEY={streaming key}}" \
+  live-streamer
+```
+
 ## Installation
 
 Apart from a few minor changes, installation is based on following documentation:
