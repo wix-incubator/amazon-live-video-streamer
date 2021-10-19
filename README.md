@@ -28,10 +28,9 @@ Run it:
 ```
 docker run \
   -p 127.0.0.1:1935:1935/tcp \
-  --env "STREAMER_DELAY=7" \
-  --env "TARGET_URL={website}}" \
-  --env "RTMP_SERVER_URL={streaming destination}" \
-  --env "STREAM_KEY={streaming key}}" \
+  --env "TARGET_URL=https://website" \
+  --env "RTMP_SERVER_URL=rtmp://streaming_destination" \
+  --env "STREAM_KEY=streaming_key" \
   live-streamer
 ```
 
