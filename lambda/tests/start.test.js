@@ -1,7 +1,6 @@
 const {
   TARGET_URL,
-  RTMP_SERVER_URL,
-  STREAM_KEY,
+  RTMP_STREAM_URL,
   STREAMING_TASK_ARN,
   mockEnvironment,
   context,
@@ -28,8 +27,7 @@ describe("Streamer Lambda", () => {
       callHandlerWithQuery({
         action: "start",
         targetUrl: TARGET_URL,
-        rtmpServerUrl: RTMP_SERVER_URL,
-        streamKey: STREAM_KEY,
+        rtmpStreamUrl: RTMP_STREAM_URL,
       });
 
       expect(ecsMock.runTask).toHaveBeenCalledTimes(1);
@@ -44,7 +42,7 @@ describe("Streamer Lambda", () => {
         expect.objectContaining({
           body: JSON.stringify(
             {
-              taskArn: STREAMING_TASK_ARN,
+              taskId: STREAMING_TASK_ARN,
             },
             null,
             1
@@ -58,8 +56,7 @@ describe("Streamer Lambda", () => {
       callHandlerWithBodyArguments({
         action: "start",
         targetUrl: TARGET_URL,
-        rtmpServerUrl: RTMP_SERVER_URL,
-        streamKey: STREAM_KEY,
+        rtmpStreamUrl: RTMP_STREAM_URL,
       });
 
       expect(ecsMock.runTask).toHaveBeenCalledTimes(1);
@@ -74,7 +71,7 @@ describe("Streamer Lambda", () => {
         expect.objectContaining({
           body: JSON.stringify(
             {
-              taskArn: STREAMING_TASK_ARN,
+              taskId: STREAMING_TASK_ARN,
             },
             null,
             1
@@ -88,15 +85,14 @@ describe("Streamer Lambda", () => {
       callHandlerWithQuery({
         action: "StarT",
         targetUrl: TARGET_URL,
-        rtmpServerUrl: RTMP_SERVER_URL,
-        streamKey: STREAM_KEY,
+        rtmpStreamUrl: RTMP_STREAM_URL,
       });
 
       expect(context.succeed).toHaveBeenCalledWith(
         expect.objectContaining({
           body: JSON.stringify(
             {
-              taskArn: STREAMING_TASK_ARN,
+              taskId: STREAMING_TASK_ARN,
             },
             null,
             1
@@ -116,8 +112,7 @@ describe("Streamer Lambda", () => {
       callHandlerWithQuery({
         action: "start",
         targetUrl: TARGET_URL,
-        rtmpServerUrl: RTMP_SERVER_URL,
-        streamKey: STREAM_KEY,
+        rtmpStreamUrl: RTMP_STREAM_URL,
       });
 
       expect(ecsMock.runTask).toHaveBeenCalledTimes(1);
@@ -158,8 +153,7 @@ describe("Streamer Lambda", () => {
       callHandlerWithQuery({
         action: "start",
         targetUrl: TARGET_URL,
-        rtmpServerUrl: RTMP_SERVER_URL,
-        streamKey: STREAM_KEY,
+        rtmpStreamUrl: RTMP_STREAM_URL,
       });
 
       expect(ecsMock.runTask).toHaveBeenCalledTimes(1);
@@ -189,8 +183,7 @@ describe("Streamer Lambda", () => {
     it("returns error if targetUrl is not provided", () => {
       callHandlerWithQuery({
         action: "start",
-        rtmpServerUrl: RTMP_SERVER_URL,
-        streamKey: STREAM_KEY,
+        rtmpStreamUrl: RTMP_STREAM_URL,
       });
 
       expect(ecsMock.runTask).not.toHaveBeenCalled();
@@ -213,11 +206,10 @@ describe("Streamer Lambda", () => {
       );
     });
 
-    it("returns error if rtmpServerUrl is not provided", () => {
+    it("returns error if rtmpStreamUrl is not provided", () => {
       callHandlerWithQuery({
         action: "start",
         targetUrl: TARGET_URL,
-        streamKey: STREAM_KEY,
       });
 
       expect(ecsMock.runTask).not.toHaveBeenCalled();
@@ -229,34 +221,7 @@ describe("Streamer Lambda", () => {
           body: JSON.stringify(
             {
               error: {
-                message: "Missing parameter: rtmpServerUrl",
-              },
-            },
-            null,
-            1
-          ),
-          statusCode: 400,
-        })
-      );
-    });
-
-    it("returns error if streamKey is not provided", () => {
-      callHandlerWithQuery({
-        action: "start",
-        targetUrl: TARGET_URL,
-        rtmpServerUrl: RTMP_SERVER_URL,
-      });
-
-      expect(ecsMock.runTask).not.toHaveBeenCalled();
-
-      expect(context.succeed).toHaveBeenCalledTimes(1);
-
-      expect(context.succeed).toHaveBeenCalledWith(
-        expect.objectContaining({
-          body: JSON.stringify(
-            {
-              error: {
-                message: "Missing parameter: streamKey",
+                message: "Missing parameter: rtmpStreamUrl",
               },
             },
             null,

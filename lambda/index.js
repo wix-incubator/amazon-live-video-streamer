@@ -25,7 +25,7 @@ exports.handler = function (event, context, callback) {
   log("Handling action: ", action);
 
   const parametersConfig = {
-    start: ["targetUrl", "rtmpServerUrl", "streamKey"],
+    start: ["targetUrl", "rtmpStreamUrl"],
     stop: ["taskId"],
   };
 
@@ -41,8 +41,7 @@ exports.handler = function (event, context, callback) {
         return startStreaming(
           respond,
           params.get("targetUrl"),
-          params.get("rtmpServerUrl"),
-          params.get("streamKey"),
+          params.get("rtmpStreamUrl"),
         );
       case "stop":
         setNamespace(action);

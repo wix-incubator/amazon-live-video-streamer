@@ -1,6 +1,5 @@
 const TARGET_URL = "https://127.0.0.1/somepage";
-const RTMP_SERVER_URL = "rtmp://127.0.0.1/livestream";
-const STREAM_KEY = "very-secret";
+const RTMP_STREAM_URL = "rtmp://127.0.0.1/livestream/token";
 const STREAMING_TASK_ARN = "STREAMING_TASK_ARN";
 
 const mockEnvironment = () => {
@@ -61,12 +60,8 @@ const getTaskDefinition = () => ({
             value: TARGET_URL,
           },
           {
-            name: "RTMP_SERVER_URL",
-            value: RTMP_SERVER_URL,
-          },
-          {
-            name: "STREAM_KEY",
-            value: STREAM_KEY,
+            name: "RTMP_STREAM_URL",
+            value: RTMP_STREAM_URL,
           },
         ],
         name: process.env.ecsContainerName,
@@ -113,8 +108,7 @@ const disableConsoleLog = () => {
 
 module.exports = {
   TARGET_URL,
-  RTMP_SERVER_URL,
-  STREAM_KEY,
+  RTMP_STREAM_URL,
   STREAMING_TASK_ARN,
   mockEnvironment,
   context,
