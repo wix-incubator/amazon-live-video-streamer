@@ -153,6 +153,7 @@ ensureEC2ImageId();
 ensureBucket();
 
 // start with a sub-template so it doesn't timeout
+console.log("Packaging");
 spawnOrFail("sam", [
   "package",
   "--s3-bucket",
@@ -160,7 +161,7 @@ spawnOrFail("sam", [
   "--template-file",
   "templates/StreamingCloudformationTemplateOnlyNetwork.yaml",
   "--output-template-file",
-  "build/packaged.yaml",
+  "build/packaged-only-network.yaml",
   "--region",
   `${region}`,
 ]);
@@ -178,8 +179,25 @@ spawnOrFail("sam", [
   `${region}`,
 ]);
 
-console.log("Deploying streaming application");
-const output = spawnOrFail("sam", [
+console.log("Deploying streaming app (only network)");
+const deployOnlyNetworkOutput = spawnOrFail("sam", [
+  "deploy",
+  "--template-file",
+  "./build/packaged-only-network.yaml",
+  "--stack-name",
+  `${stack}`,
+  "--parameter-overrides",
+  `ECRDockerImageArn=${ecrDockerImageArn}`,
+  "--capabilities",
+  "CAPABILITY_IAM",
+  "--region",
+  `${region}`,
+  "--no-fail-on-empty-changeset",
+]);
+console.log(deployOnlyNetworkOutput);
+
+console.log("Deploying streaming app");
+const fullDeployOutput = spawnOrFail("sam", [
   "deploy",
   "--template-file",
   "./build/packaged.yaml",
@@ -193,7 +211,7 @@ const output = spawnOrFail("sam", [
   `${region}`,
   "--no-fail-on-empty-changeset",
 ]);
-console.log(output);
+console.log(fullDeployOutput);
 
 const invokeUrl = spawnOrFail("aws", [
   "cloudformation",
