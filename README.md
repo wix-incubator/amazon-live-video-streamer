@@ -17,6 +17,22 @@ Additional information can be found in internal Slack channel for live-video.
 
 ---
 
+## Testing container locally
+
+Build docker image locally:
+```
+docker build -t live-streamer .
+```
+
+Run it:
+```
+docker run \
+  -p 127.0.0.1:1935:1935/tcp \
+  --env "TARGET_URL=https://website" \
+  --env "RTMP_STREAM_URL=rtmp://streaming_destination/streaming_key" \
+  live-streamer
+```
+
 ## Installation
 
 Apart from a few minor changes, installation is based on following documentation:
@@ -129,6 +145,13 @@ Go to "Log groups". There will be 2 groups which will provide valuable informati
 - StreamingLogGroup - streamer logs
 
 Please note that streamer logs will contain a lot of instances of "xdotool mousemove 1 100 click 1". This is because streamer needs to simulate click in order to enable auto-play on browser. However, problem is that it is not known exactly when this click needs to be emulated. As a result, this simulated click is repeated continuously.
+
+---
+
+## Fault testing
+https://github.com/alexei-led/pumba
+
+TODO
 
 ---
 

@@ -7,7 +7,7 @@ const ecsClusterArn = process.env.ecsClusterArn;
 const ecsTaskDefinitionArn = process.env.ecsTaskDefinitionArn;
 const ecsContainerName = process.env.ecsContainerName;
 
-const startStreaming = (respond, targetUrl, rtmpServerUrl, streamKey) => {
+const startStreaming = (respond, targetUrl, rtmpStreamUrl) => {
   let ecsRunTaskParams = {
     cluster: ecsClusterArn,
     launchType: "EC2",
@@ -25,12 +25,8 @@ const startStreaming = (respond, targetUrl, rtmpServerUrl, streamKey) => {
               value: targetUrl,
             },
             {
-              name: "RTMP_SERVER_URL",
-              value: rtmpServerUrl,
-            },
-            {
-              name: "STREAM_KEY",
-              value: streamKey,
+              name: "RTMP_STREAM_URL",
+              value: rtmpStreamUrl,
             },
           ],
           name: ecsContainerName,
@@ -57,7 +53,7 @@ const startStreaming = (respond, targetUrl, rtmpServerUrl, streamKey) => {
       if (data.tasks.length && data.tasks[0].taskArn) {
         respond({
           statusCode: 200,
-          body: JSON.stringify({ taskArn: data.tasks[0].taskArn }, null, 1),
+          body: JSON.stringify({ taskId: data.tasks[0].taskArn }, null, 1),
         });
       } else {
         respond({
