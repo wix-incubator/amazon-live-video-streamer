@@ -31,13 +31,13 @@ Parameters:
     Description: 'ARN of the docker image stored in ECR along with the tag'
   EcsAsgMinSize:
     Type: Number
-    Default: 50
+    Default: 1
   EcsAsgMaxSize:
     Type: Number
-    Default: 1000
+    Default: 1
   DesiredCapacity:
     Type: Number
-    Default: 50
+    Default: 1
     Description: Number of instances to launch in your ECS cluster.
   ImageId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
@@ -278,7 +278,7 @@ Resources:
       - !Ref PublicSubnet1
       - !Ref PublicSubnet2
       LaunchConfigurationName: !Ref ContainerInstances
-      MinSize: '5'
+      MinSize: '1'
       MaxSize: !Ref EcsAsgMaxSize
       DesiredCapacity: !Ref DesiredCapacity
     CreationPolicy:
