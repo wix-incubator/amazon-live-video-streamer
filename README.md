@@ -21,7 +21,7 @@ Additional information can be found in internal Slack channel for live-video.
 
 Build docker image locally:
 ```
-docker build -t live-streamer .
+docker build -t livevideo-streamer .
 ```
 
 Run it:
@@ -30,7 +30,7 @@ docker run \
   -p 127.0.0.1:1935:1935/tcp \
   --env "TARGET_URL=https://website" \
   --env "RTMP_STREAM_URL=rtmp://streaming_destination/streaming_key" \
-  live-streamer
+  livevideo-streamer
 ```
 
 ## Installation
@@ -51,7 +51,7 @@ Should you need to create a new environment, use following options:
 In case installation is performed on a new AWS account, you would need to create a repository:
 
 ```
-aws ecr create-repository --repository-name live-streamer
+aws ecr create-repository --repository-name livevideo-streamer
 ```
 
 Please note that names used might need to be changed. For example, when it comes to S3 - bucket names must be unique globally.
@@ -68,7 +68,7 @@ To build new docker image, run the following command:
 make ECR_REPO_URI={repository URI}
 ```
 
-Sometimes build fails due to lack of space on disk. Should this happen, you can increase disk size and repeat make operation. To increase size, run following commands:
+Sometimes build fails due to lack of space on disk. Should this happen, you can increase disk size (in EC2 -> EBS) and repeat make operation. To increase size, run following commands:
 
 ```
 # Check disk and partition name and use it in commands below
@@ -87,7 +87,7 @@ You can also find URI by going to AWS console and then going into Elastic Contai
 Finally, you need to deploy docker image, configure cloud, S3, network, etc. This is done by using script:
 
 ```
-node ./deploy.js -b live-streamer -s live-streamer -i {repository URI}:latest -r us-east-1
+node ./deploy.js -b livevideo-streamer -s livevideo-streamer -i {repository URI}:latest -r us-east-1
 ```
 
 During initial deployment this script is known to sometimes fail due to timeout. Should that happen, changes will automatically be reverted. To work-around the issue try modifying deploy.js script to use _StreamingCloudformationTemplateOnlyNetwork.yaml_ cloud formation template. After running with reduced template, switch back to _StreamingCloudformationTemplateNAT.yaml_ and run the script again.
@@ -118,7 +118,7 @@ make ECR_REPO_URI={repository URI}
 - Deploy updated image and new Lambda:
 
 ```
-node ./deploy.js -s live-streamer -i {repository URI}:latest -r us-east-1
+node ./deploy.js -s livevideo-streamer -i {repository URI}:latest -r us-east-1
 ```
 
 There have been cases when above command fails due to token expiration during update. After this happens stack goes into cleanup mode and repeated deploy command will fail until it is finished. It may take up to an hour in some cases. After cleanup is complete, please try deployment again - experience shows that it tends to succeed second time...
