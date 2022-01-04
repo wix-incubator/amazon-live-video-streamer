@@ -152,6 +152,20 @@ console.log(`Using region ${region}, bucket ${bucket}, stack ${stack}`);
 ensureEC2ImageId();
 ensureBucket();
 
+// start with a sub-template so it doesn't timeout
+spawnOrFail("sam", [
+  "package",
+  "--s3-bucket",
+  `${bucket}`,
+  "--template-file",
+  "templates/StreamingCloudformationTemplateOnlyNetwork.yaml",
+  "--output-template-file",
+  "build/packaged.yaml",
+  "--region",
+  `${region}`,
+]);
+
+// continue with full template
 spawnOrFail("sam", [
   "package",
   "--s3-bucket",
