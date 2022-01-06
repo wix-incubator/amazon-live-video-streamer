@@ -76,7 +76,7 @@ log(`RTMP_STREAM_URL: ${RTMP_STREAM_URL}`);
         `#transcode{${videoOpts},${audioOpts},audio-sync,threads=0}:standard{${outputOpts}}`,
         '--sout-mux-caching=1500',
         // Verbose output
-        '-vvv',
+        // '-vvv',
     ]
 
     log(`cvlc ${cvlcArgs.join(' ')}`);
