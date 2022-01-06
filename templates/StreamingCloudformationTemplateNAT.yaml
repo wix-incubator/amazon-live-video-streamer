@@ -22,7 +22,7 @@ Parameters:
   EcsClusterName:
     Type: String
     Description: 'Specifies the ECS Cluster Name with which the resources would be associated'
-    Default: 'livevideo-StreamingEC2Cluster'
+    Default: 'StreamingEC2Cluster'
   ECRDockerImageArn:
     Type: String
     Description: 'ARN of the docker image stored in ECR along with the tag'
