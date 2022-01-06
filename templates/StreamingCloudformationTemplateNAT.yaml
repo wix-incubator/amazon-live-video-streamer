@@ -31,10 +31,10 @@ Parameters:
     Default: 1
   EcsAsgMaxSize:
     Type: Number
-    Default: 1
+    Default: 50
   DesiredCapacity:
     Type: Number
-    Default: 1
+    Default: 10
     Description: Number of instances to launch in your ECS cluster.
   ImageId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
