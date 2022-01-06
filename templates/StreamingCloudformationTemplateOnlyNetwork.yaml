@@ -25,6 +25,8 @@ Parameters:
     Description: Please enter the IP range (CIDR notation) for the public subnet in the second Availability Zone
     Type: String
     Default: 10.192.11.0/24
+  Resources:
+
 # Refer: https://docs.aws.amazon.com/codebuild/latest/userguide/cloudformation-vpc-template.html
  
   VPC:
