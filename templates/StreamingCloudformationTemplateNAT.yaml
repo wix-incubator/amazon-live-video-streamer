@@ -9,7 +9,7 @@ Parameters:
     Default: 8192
   ECSContainerName:
     Type: String
-    Default: 'streaming-container'
+    Default: 'livevideo-streaming-container'
   ECSContainerCpu:
     Type: Number
     Default: 4096
@@ -22,7 +22,7 @@ Parameters:
   EcsClusterName:
     Type: String
     Description: 'Specifies the ECS Cluster Name with which the resources would be associated'
-    Default: 'StreamingEC2Cluster'
+    Default: 'livevideo-StreamingEC2Cluster'
   ECRDockerImageArn:
     Type: String
     Description: 'ARN of the docker image stored in ECR along with the tag'
@@ -50,11 +50,11 @@ Parameters:
     ConstraintDescription: Please choose a valid instance type.
   StreamingLogGroupName:
     Type: String
-    Default: StreamingLogGroup
+    Default: livevideo-StreamingLogGroup
   EnvironmentName:
     Description: An environment name that is prefixed to resource names
     Type: String
-    Default: streaming-environment
+    Default: livevideo-streaming-environment
   VpcCIDR:
     Description: Please enter the IP range (CIDR notation) for this VPC
     Type: String
@@ -104,7 +104,7 @@ Resources:
   StreamingLambdaFunction:
     Type: 'AWS::Serverless::Function'
     Properties:
-      FunctionName: StreamingLambda
+      FunctionName: livevideo-StreamingLambda
       Description: Lambda to interact with ECS for starting and stopping streaming.
       Handler: index.handler
       Role: 
