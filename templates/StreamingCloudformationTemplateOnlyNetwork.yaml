@@ -26,6 +26,7 @@ Parameters:
     Type: String
     Default: 10.192.11.0/24
   Resources:
+    #
 
 # Refer: https://docs.aws.amazon.com/codebuild/latest/userguide/cloudformation-vpc-template.html
  
